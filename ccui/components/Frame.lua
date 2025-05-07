@@ -12,17 +12,20 @@ local Component = require("ccui.components.Component")
 ---@field parent Component?
 ---@field children Component[]
 
--- Container component. Also acts as a root component for an app.
 local Frame = {}
 setmetatable(Frame, Component)
 Frame.__index = Frame
 
 ---@class FrameProps
----@field term term?
+---@field term ccTweaked.term.Redirect
 ---@field x number?
 ---@field y number?
 ---@field width number?
 ---@field height number?
+
+--- Creates a new frame component, which is a container for other components.
+--- Also acts as a root component for an app.
+--- Defaults to the size of the terminal if no width/height are specified.
 ---@param props FrameProps
 function Frame.new(props)
   local self = Component.new(props)
@@ -40,7 +43,8 @@ function Frame.new(props)
   return self
 end
 
-function Frame:render()
+---@param term ccTweaked.term.Redirect
+function Frame:render(term)
   term.setCursorPos(self.x, self.y)
   if self.bgColor then
     term.setBackgroundColor(self.bgColor)
@@ -58,7 +62,7 @@ function Frame:render()
   term.setCursorPos(self.x, self.y)
 
   -- render children
-  Component.render(self)
+  Component.render(self, term)
 end
 
 return Frame

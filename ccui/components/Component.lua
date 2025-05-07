@@ -47,7 +47,8 @@ function Component:add(child)
   return self
 end
 
-function Component:render()
+---@param term ccTweaked.term.Redirect
+function Component:render(term)
   if self.x and self.y then
     term.setCursorPos(self.x, self.y)
   end
@@ -59,7 +60,7 @@ function Component:render()
     if self.fgColor then
       term.setTextColor(self.fgColor)
     end
-    child:render()
+    child:render(term)
   end
 end
 

@@ -27,7 +27,9 @@ function Label:setText(text)
   return self
 end
 
-function Label:render()
+
+---@param term ccTweaked.term.Redirect
+function Label:render(term)
   term.setCursorPos(self.x, self.y)
   local fg = self.fgColor or colors.white
   local bg = self.bgColor or colors.black
@@ -35,7 +37,7 @@ function Label:render()
 
   -- labels shouldn't have children anyway
   ---@todo remove
-  Component.render(self)
+  Component.render(self, term)
 end
 
 return Label

@@ -17,7 +17,7 @@ function Core.new()
   local self = setmetatable({}, Core)
 
   self.root = Frame.new({
-    term = term
+    term = term.current(),
   })
 
   return self
@@ -26,7 +26,7 @@ end
 function Core:start()
   clear()
   self.root:render()
-  os.pullEvent("key")
+  os.pullEvent("char")
   clear()
 end
 
