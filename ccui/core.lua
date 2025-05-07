@@ -25,7 +25,7 @@ end
 
 function Core:start()
   clear()
-  self.root:render()
+  self.root:render(term.current())
   os.pullEvent("char")
   clear()
 end
