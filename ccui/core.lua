@@ -1,9 +1,14 @@
+local Component = require("ccui.components.Component")
 local Frame = require("ccui.components.Frame")
+local Util = require("ccui.util")
+
+---@alias EventFn fun(self: Component, ...)
 
 ---@class Core
 ---@field root Frame
 ---@field term ccTweaked.term.Redirect
 ---@field running boolean
+---@field private events table<string, table<string, EventFn>>
 local Core = {}
 Core.__index = Core
 
@@ -37,6 +42,21 @@ function Core:renderUI()
   self.root:render(self.term)
 end
 
+---@param event string
+---@param handler EventFn
+---@return Core, integer
+function Core:addEventListener(event, handler)
+  if not self.events[event] then
+    self.events[event] = {}
+  end
+  local id = Util.generateUniqueId()
+
+  self.events[event][id] = handler
+
+  return self, id
+end
+
+---@return Core
 function Core:start()
   -- first render
   self:renderUI()
