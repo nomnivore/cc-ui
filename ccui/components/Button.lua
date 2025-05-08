@@ -1,30 +1,13 @@
 local Component = require("ccui.components.Component")
 
----@class Button
----@field x number
----@field y number
----@field width number
----@field height number
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
----@field type string
----@field parent Component?
----@field children Component[]
+---@class Button : Component
 ---@field text string
 ---@field onClick fun(self: Button)
-
 local Button = {}
 setmetatable(Button, Component)
 Button.__index = Button
 
----@class ButtonProps
----@field type string?
----@field x number
----@field y number
----@field width number?
----@field height number?
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
+---@class ButtonProps : ComponentProps
 ---@field text string?
 ---@field onClick fun(self: Button)
 
@@ -32,18 +15,22 @@ Button.__index = Button
 function Button.new(props)
   local self = Component.new(props)
   setmetatable(self, Button)
+  ---@cast self Button
+  
   self.type = "button"
   self.text = props.text or ""
-  self.onClick = props.onClick or function() end
+  self.onClick = props.onClick or function(_) end
   self.width = props.width or #self.text + 2
   self.height = props.height or 1
+
+
   return self
 end
 
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
-  local bg = self.fgColor or colors.white
-  local fg = self.bgColor or colors.black
+  local bg = self.bgColor or colors.white
+  local fg = self.fgColor or colors.black
   -- term.blit(self.text, string.rep(colors.toBlit(fg), #self.text), string.rep(colors.toBlit(bg), #self.text))
 
   local labelY = self.y + math.floor((self.height - 1) / 2)
@@ -54,11 +41,15 @@ function Button:render(term)
   term.setCursorPos(self.x, self.y)
   -- print entire width/height using bg color
   for i = 1, self.height do
+    term.setCursorPos(self.x, self.y + i - 1)
     term.write(string.rep(" ", self.width))
   end
 
   term.setCursorPos(self.x + 1, labelY)
   term.write(self.text)
+
+  term.setBackgroundColor(colors.black)
+  term.setTextColor(colors.white)
 
   Component.render(self, term)
 end

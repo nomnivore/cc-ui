@@ -1,27 +1,17 @@
 local Component = require("ccui.components.Component")
 
----@class Frame
+---@class Frame : Component
 ---@field term term
 ---@field x number
 ---@field y number
 ---@field width number
 ---@field height number
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
----@field type string
----@field parent Component?
----@field children Component[]
-
 local Frame = {}
 setmetatable(Frame, Component)
 Frame.__index = Frame
 
----@class FrameProps
+---@class FrameProps : ComponentProps
 ---@field term ccTweaked.term.Redirect
----@field x number?
----@field y number?
----@field width number?
----@field height number?
 
 --- Creates a new frame component, which is a container for other components.
 --- Also acts as a root component for an app.
@@ -30,6 +20,7 @@ Frame.__index = Frame
 function Frame.new(props)
   local self = Component.new(props)
   setmetatable(self, Frame)
+  ---@cast self Frame
 
   local tW, tH = term.getSize()
 

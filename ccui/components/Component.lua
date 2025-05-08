@@ -1,14 +1,13 @@
 ---@class Component
 ---@field type string
----@field x number?
----@field y number?
----@field width number?
----@field height number?
+---@field x number
+---@field y number
+---@field width number
+---@field height number
 ---@field bgColor ccTweaked.colors.color?
 ---@field fgColor ccTweaked.colors.color?
 ---@field parent Component?
 ---@field children Component[]
-
 local Component = {}
 Component.__index = Component
 
@@ -27,6 +26,10 @@ function Component.new(props)
 
   -- props with default values
   self.type = "component"
+  self.x = 1
+  self.y = 1
+  self.width = 1
+  self.height = 1
 
   -- props defined in table arg
   for k, v in pairs(props) do
@@ -45,6 +48,29 @@ function Component:add(child)
   table.insert(self.children, child)
 
   return self
+end
+
+---Recursively scans the component tree for a component at the given position
+---Preference is given to children over the parent
+---@param x number
+---@param y number
+---@return Component?
+function Component:findComponentAt(x, y)
+  for _, child in ipairs(self.children) do
+    local result = child:findComponentAt(x, y)
+    if result then
+      return result
+    end
+  end
+
+  if self.x and self.y then
+    if x >= self.x and x <= self.x + self.width and y >= self.y and y <= self.y + self.height then
+      return self
+    end
+  end
+
+  return nil
+
 end
 
 ---@param term ccTweaked.term.Redirect

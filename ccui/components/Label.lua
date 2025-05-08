@@ -1,21 +1,20 @@
 local Component = require("ccui.components.Component")
 
+---@class Label : Component
+---@field text string
 local Label = {}
 setmetatable(Label, Component)
 Label.__index = Label
 
----@class LabelProps
----@field type string?
----@field x number?
----@field y number?
+---@class LabelProps : ComponentProps
 ---@field text string?
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
 
 ---@param props LabelProps
 function Label.new(props)
   local self = Component.new(props)
   setmetatable(self, Label)
+  ---@cast self Label
+
   self.type = "label"
   self.text = props.text or ""
   return self
