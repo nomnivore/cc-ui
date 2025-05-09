@@ -7,3 +7,7 @@ local exports = {
 }
 
 return exports
+
+-- To bundle, run:
+-- bunx luabundler bundle .\ccui\init.lua -p "?.lua" -p "?\\init.lua" -o release/ccui.lua
+-- (requires bun to be installed (or npm with npx))
