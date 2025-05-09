@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "bundle": "bunx luabundler bundle ./ccui/init.lua -p ?.lua -p ?/init.lua -o release/ui.lua",
+    "minify": "bunx luamin -f release/ui.lua > release/ui.min.lua && mv release/ui.min.lua release/ui.lua",
+    "build": "bun run bundle && bun run minify"
+  }
+}
