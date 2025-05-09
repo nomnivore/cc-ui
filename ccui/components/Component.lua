@@ -24,6 +24,7 @@ Component.__index = Component
 ---@field bgColor ccTweaked.colors.color?
 ---@field fgColor ccTweaked.colors.color?
 
+--- Creates a new component
 ---@param props ComponentProps
 function Component.new(props)
   local self = setmetatable({}, Component)
@@ -48,6 +49,7 @@ function Component.new(props)
   return self
 end
 
+--- Adds a child component to this component, mounting it if this component is mounted
 ---@param child Component
 function Component:add(child)
   child.parent = self
@@ -62,6 +64,7 @@ end
 
 -- Event handling
 
+--- Mounts this component and all children to a core, adding its event listeners
 ---@param core Core
 function Component:mount(core)
   self.core = core
@@ -79,6 +82,7 @@ function Component:mount(core)
   end
 end
 
+--- Unmounts this component and all children from the core, removing its event listeners
 function Component:unmount()
   if self.core and self.eventListeners then
     for event, listeners in pairs(self.eventListeners) do
@@ -95,6 +99,7 @@ function Component:unmount()
   self.core = nil
 end
 
+--- Adds an event listener to the component
 ---@param event ccTweaked.os.event
 ---@param callback EventFn
 ---@return Component, EventFn
@@ -112,6 +117,7 @@ function Component:on(event, callback)
   return self, listener
 end
 
+--- Removes an event listener from the component
 ---@param event ccTweaked.os.event
 ---@param callback EventFn
 ---@return Component
@@ -130,10 +136,15 @@ function Component:off(event, callback)
   return self
 end
 
+--- Tests if a point is inside the component's bounds
+---@param x number
+---@param y number
+---@return boolean
 function Component:hitTest(x, y)
   return Util.pointInRect(x, y, self)
 end
 
+--- Adds an event listener for mouse clicks on the component
 ---@param callback fun(self: Component)
 ---@return Component
 function Component:onClick(callback)
@@ -146,6 +157,7 @@ function Component:onClick(callback)
   return self
 end
 
+--- Renders the component to the display
 ---@param term ccTweaked.term.Redirect
 function Component:render(term)
   if self.x and self.y then
