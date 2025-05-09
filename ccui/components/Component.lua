@@ -8,6 +8,7 @@ local Util = require("ccui.util")
 ---@field height number|fun(self: Component): number
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
+---@field id string
 
 ---@class Component
 ---@field parent Component?
@@ -26,6 +27,7 @@ Component.__index = Component
 ---@field height number|nil|fun(self: Component): number
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
+---@field id string|nil
 
 --- Creates a new component
 ---@param props NewComponentProps
@@ -46,12 +48,32 @@ function Component.new(props)
     self.props[k] = v
   end
 
+  if props.id == nil then
+    self.props.id = tostring(Util.generateUniqueId())
+  end
+
   self.parent = nil
   self.children = {}
   self.eventListeners = {}
 
 
   return self
+end
+
+--- Finds a component by its id
+---@param id string
+---@return Component?
+function Component:findById(id)
+  if self:getProps("id") == id then
+    return self
+  end
+
+  for _, child in ipairs(self.children) do
+    local result = child:findById(id)
+    if result then
+      return result
+    end
+  end
 end
 
 --- Gets a prop value, evaluating functions if necessary
@@ -81,6 +103,8 @@ function Component:add(child)
 
   return self
 end
+
+
 
 -- Event handling
 
