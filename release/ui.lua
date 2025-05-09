@@ -1,627 +1,119 @@
--- Bundled by luabundle {"version":"1.7.0"}
-local __bundle_require, __bundle_loaded, __bundle_register, __bundle_modules = (function(superRequire)
-	local loadingPlaceholder = {[{}] = true}
 
-	local register
-	local modules = {}
-
-	local require
-	local loaded = {}
-
-	register = function(name, body)
-		if not modules[name] then
-			modules[name] = body
-		end
-	end
-
-	require = function(name)
-		local loadedModule = loaded[name]
-
-		if loadedModule then
-			if loadedModule == loadingPlaceholder then
-				return nil
-			end
-		else
-			if not modules[name] then
-				if not superRequire then
-					local identifier = type(name) == 'string' and '\"' .. name .. '\"' or tostring(name)
-					error('Tried to require ' .. identifier .. ', but no such module has been registered')
-				else
-					return superRequire(name)
-				end
-			end
-
-			loaded[name] = loadingPlaceholder
-			loadedModule = modules[name](require, loaded, register, modules)
-			loaded[name] = loadedModule
-		end
-
-		return loadedModule
-	end
-
-	return require, loaded, register, modules
-end)(require)
-__bundle_register("__root", function(require, _LOADED, __bundle_register, __bundle_modules)
-local exports = {
-  Core = require("ccui.core"),
-  Components = require("ccui.components"),
-  Util = require("ccui.util"),
-
-  new = require("ccui.core").new,
-}
-
-return exports
-
--- To bundle, run:
--- bunx luabundler bundle .\ccui\init.lua -p "?.lua" -p "?\\init.lua" -o release/ccui.lua
--- (requires bun to be installed (or npm with npx))
-end)
-__bundle_register("ccui.core", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Component = require("ccui.components.Component")
-local Frame = require("ccui.components.Frame")
-local Util = require("ccui.util")
-
----@alias EventFn fun(self: Component, ...)
-
----@class Core
----@field root Frame
----@field term ccTweaked.term.Redirect
----@field running boolean
----@field private events table<ccTweaked.os.event, EventFn[]>
-local Core = {}
-Core.__index = Core
-
--- used to hang onto the global term object
-local ccterm = term
-
-
----@return Core
----@param term ccTweaked.term.Redirect?
-function Core.new(term)
-  local self = setmetatable({}, Core)
-
-  self.term = term or ccterm.current()
-  self.root = Frame.new({
-    term = self.term,
-  })
-  self.running = false
-  self.events = {}
-  
-  local test = self.events["alarm"]
-
-  return self
-end
-
-function Core:clearScreen()
-  self.term.clear()
-  self.term.setCursorPos(1, 1)
-  self.term.setTextColor(colors.white)
-  self.term.setBackgroundColor(colors.black)
-end
-
-function Core:renderUI()
-  self:clearScreen()
-  self.root:render(self.term)
-end
-
----Adds an event listener to the core, which will now be checked for in the main event loop.
----Returns the core and the callback function, which can be used to remove the listener.
----@param event string
----@param callback EventFn
----@return Core, EventFn
-function Core:addEventListener(event, callback)
-  if not self.events[event] then
-    self.events[event] = {}
-  end
-  table.insert(self.events[event], callback)
-
-  return self, callback
-end
-
----Removes an event listener from the core
----@param event string
----@param callback EventFn
----@return Core
-function Core:removeEventListener(event, callback)
-  if not self.events[event] then
-    return self
-  end
-
-  for i, v in ipairs(self.events[event]) do
-    if v == callback then
-      table.remove(self.events[event], i)
-      break
-    end
-  end
-
-  return self
-end
-
----Mounts the root component and starts the main event loop
----@return Core
-function Core:start()
-  -- first render
-  self.root:mount(self)
-  self:renderUI()
-
-  self.running = true
-  while self.running do
-    self:renderUI()
-    local event, param1, param2, param3 = os.pullEvent()
-    if self.events[event] then
-      for _, callback in ipairs(self.events[event]) do
-        callback(param1, param2, param3)
-      end
-    end
-
-    -- if event == "char" then
-    --   if param1 == "q" then
-    --     self:stop()
-    --   end
-    -- end
-  end
-  self:clearScreen()
-
-  return self
-end
-
----Stops the main event loop and unmounts the root component
----@return Core
-function Core:stop()
-  self.running = false
-
-  return self
-end
-
-return Core
-end)
-__bundle_register("ccui.util", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Util = {}
-
-local id = 0
-function Util.generateUniqueId()
-  id = id + 1
-  return id
-end
-
----@alias Rect {x: number, y: number, width: number, height: number}
-
---- Checks if a point is inside a rectangle
----@param x number
----@param y number
----@param rect Rect
----@return boolean
-function Util.pointInRect(x, y, rect)
-  return x >= rect.x and x <= rect.x + rect.width - 1 and y >= rect.y and y <= rect.y + rect.height - 1
-end
-
-return Util
-end)
-__bundle_register("ccui.components.Frame", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Component = require("ccui.components.Component")
-
----@class FrameProps : ComponentProps
----@field term ccTweaked.term.Redirect
-
----@class Frame : Component
----@field props FrameProps
-local Frame = {}
-setmetatable(Frame, Component)
-Frame.__index = Frame
-
----@class NewFrameProps : NewComponentProps
----@field term ccTweaked.term.Redirect?
-
---- Creates a new frame component, which is a container for other components.
---- Also acts as a root component for an app.
---- Defaults to the size of the terminal if no width/height are specified.
----@param props NewFrameProps
-function Frame.new(props)
-  local self = Component.new(props)
-  setmetatable(self, Frame)
-  ---@cast self Frame
-
-  local tW, tH = term.getSize()
-
-  self.props.type = "frame"
-
-  self.props.x = props.x or 1
-  self.props.y = props.y or 1
-  self.props.width = props.width or tW
-  self.props.height = props.height or tH
-
-  return self
-end
-
----@param term ccTweaked.term.Redirect
-function Frame:render(term)
-  local x = self:getProps("x")
-  local y = self:getProps("y")
-  local bgColor = self:getProps("bgColor")
-  local fgColor = self:getProps("fgColor")
-  local width = self:getProps("width")
-  local height = self:getProps("height")
-
-  term.setCursorPos(x, y)
-  if bgColor then
-    term.setBackgroundColor(bgColor)
-  end
-  if fgColor then
-    term.setTextColor(fgColor)
-  end
-
-  -- print entire width/height using bg color
-  for i = 1, height do
-    term.write(string.rep(" ", width))
-  end
-
-  -- reset cursor position
-  term.setCursorPos(x, y)
-
-  -- render children
-  Component.render(self, term)
-end
-
-return Frame
-end)
-__bundle_register("ccui.components.Component", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Util = require("ccui.util")
-
----@class ComponentProps
----@field type string|fun(self: Component): string
----@field x number|fun(self: Component): number
----@field y number|fun(self: Component): number
----@field width number|fun(self: Component): number
----@field height number|fun(self: Component): number
----@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
----@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
----@field id string
-
----@class Component
----@field parent Component?
----@field children Component[]
----@field core Core?
----@field eventListeners table<string, table<string, EventFn>>
----@field props ComponentProps @see getProps
-local Component = {}
-Component.__index = Component
-
----@class NewComponentProps
----@field type string|nil|fun(self: Component): string
----@field x number|nil|fun(self: Component): number
----@field y number|nil|fun(self: Component): number
----@field width number|nil|fun(self: Component): number
----@field height number|nil|fun(self: Component): number
----@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
----@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
----@field id string|nil
-
---- Creates a new component
----@param props NewComponentProps
-function Component.new(props)
-  local self = setmetatable({}, Component)
-
-  -- props with default values
----@diagnostic disable-next-line: missing-fields
-  self.props = {}
-  self.props.type = "component"
-  self.props.x = 1
-  self.props.y = 1
-  self.props.width = 1
-  self.props.height = 1
-
-  -- props defined in table arg
-  for k, v in pairs(props) do
-    self.props[k] = v
-  end
-
-  if props.id == nil then
-    self.props.id = tostring(Util.generateUniqueId())
-  end
-
-  self.parent = nil
-  self.children = {}
-  self.eventListeners = {}
-
-
-  return self
-end
-
---- Finds a component by its id
----@param id string
----@return Component?
-function Component:findById(id)
-  if self:getProps("id") == id then
-    return self
-  end
-
-  for _, child in ipairs(self.children) do
-    local result = child:findById(id)
-    if result then
-      return result
-    end
-  end
-end
-
---- Gets a prop value, evaluating functions if necessary
----@param name string
----@param defaultValue any?
----@return any
-function Component:getProps(name, defaultValue)
-  local value = self.props[name]
-  if type(value) == "function" then
-      return value(self)
-  elseif value == nil then
-      return defaultValue
-  else
-      return value
-  end
-end
-
---- Adds a child component to this component, mounting it if this component is mounted
----@param child Component
-function Component:add(child)
-  child.parent = self
-  table.insert(self.children, child)
-
-  if self.core then
-    child:mount(self.core)
-  end
-
-  return self
-end
-
-
-
--- Event handling
-
---- Mounts this component and all children to a core, adding its event listeners
----@param core Core
-function Component:mount(core)
-  self.core = core
-
-  if self.eventListeners then
-    for event, listeners in pairs(self.eventListeners) do
-      for _, listener in ipairs(listeners) do
-        core:addEventListener(event, listener)
-      end
-    end
-  end
-
-  for _, child in ipairs(self.children) do
-    child:mount(core)
-  end
-end
-
---- Unmounts this component and all children from the core, removing its event listeners
-function Component:unmount()
-  if self.core and self.eventListeners then
-    for event, listeners in pairs(self.eventListeners) do
-      for _, listener in ipairs(listeners) do
-        self.core:removeEventListener(event, listener)
-      end
-    end
-  end
-
-  for _, child in ipairs(self.children) do
-    child:unmount()
-  end
-
-  self.core = nil
-end
-
---- Adds an event listener to the component
----@param event ccTweaked.os.event
----@param callback EventFn
----@return Component, EventFn
-function Component:on(event, callback)
-  if not self.eventListeners[event] then
-    self.eventListeners[event] = {}
-  end
-
-  local listener = function(...)
-    callback(self, ...)
-  end
-
-  table.insert(self.eventListeners[event], listener)
-
-  return self, listener
-end
-
---- Removes an event listener from the component
----@param event ccTweaked.os.event
----@param callback EventFn
----@return Component
-function Component:off(event, callback)
-  if not self.eventListeners[event] then
-    return self
-  end
-
-  for i, v in ipairs(self.eventListeners[event]) do
-    if v == callback then
-      table.remove(self.eventListeners[event], i)
-      break
-    end
-  end
-
-  return self
-end
-
---- Tests if a point is inside the component's bounds
----@param x number
----@param y number
----@return boolean
-function Component:hitTest(x, y)
-  return Util.pointInRect(x, y, {
-    x = self:getProps("x"),
-    y = self:getProps("y"),
-    width = self:getProps("width"),
-    height = self:getProps("height"),
-  })
-end
-
---- Adds an event listener for mouse clicks on the component
----@param callback fun(self: Component)
----@return Component
-function Component:onClick(callback)
-  self:on("mouse_click", function(_, mb, x, y)
-    if mb == 1 and self:hitTest(x, y) then
-      callback(self)
-    end
-  end)
-
-  return self
-end
-
---- Renders the component to the display
----@param term ccTweaked.term.Redirect
-function Component:render(term)
-  local x = self:getProps("x")
-  local y = self:getProps("y")
-  local bgColor = self:getProps("bgColor")
-  local fgColor = self:getProps("fgColor")
-
-  if x and y then
-    term.setCursorPos(x, y)
-  end
-
-  for _, child in ipairs(self.children) do
-    if bgColor then
-      term.setBackgroundColor(bgColor)
-    end
-    if fgColor then
-      term.setTextColor(fgColor)
-    end
-    child:render(term)
-  end
-end
-
-return Component
-end)
-__bundle_register("ccui.components", function(require, _LOADED, __bundle_register, __bundle_modules)
-local exports = {
-    Component = require("ccui.components.Component"),
-    Frame = require("ccui.components.Frame"),
-    Label = require("ccui.components.Label"),
-    Button = require("ccui.components.Button"),
-}
-
-return exports
-end)
-__bundle_register("ccui.components.Button", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Component = require("ccui.components.Component")
-
----@class ButtonProps : ComponentProps
----@field text string|fun(self: Button): string
-
----@class Button : Component
----@field props ButtonProps
-local Button = {}
-setmetatable(Button, Component)
-Button.__index = Button
-
----@class NewButtonProps : NewComponentProps
----@field text string|nil|fun(self: Button): string
-
----@param props NewButtonProps
-function Button.new(props)
-  local self = Component.new(props)
-  setmetatable(self, Button)
-  ---@cast self Button
-  
-  self.props.type = "button"
-  self.props.text = props.text or ""
-  self.props.width = props.width or function(self) return #self:getProps("text") + 2 end
-  self.props.height = props.height or 1
-
-  return self
-end
-
----@param term ccTweaked.term.Redirect
-function Button:render(term)
-  local bg = self:getProps("bgColor", colors.white)
-  local fg = self:getProps("fgColor", colors.black)
-  local x = self:getProps("x")
-  local y = self:getProps("y")
-  local width = self:getProps("width")
-  local height = self:getProps("height")
-  local text = self:getProps("text")
-
-  local labelY = y + math.floor((height - 1) / 2)
-
-  term.setBackgroundColor(bg)
-  term.setTextColor(fg)
-
-  term.setCursorPos(x, y)
-  -- print entire width/height using bg color
-  for i = 1, height do
-    term.setCursorPos(x, y + i - 1)
-    term.write(string.rep(" ", width))
-  end
-
-  term.setCursorPos(x + 1, labelY)
-  term.write(text)
-
-  term.setBackgroundColor(colors.black)
-  term.setTextColor(colors.white)
-
-  Component.render(self, term)
-end
-
-return Button
-
-end)
-__bundle_register("ccui.components.Label", function(require, _LOADED, __bundle_register, __bundle_modules)
-local Component = require("ccui.components.Component")
-
----@class LabelProps : ComponentProps
----@field text string|fun(self: Label): string
-
----@class Label : Component
----@field props LabelProps
-local Label = {}
-setmetatable(Label, Component)
-Label.__index = Label
-
----@class NewLabelProps : NewComponentProps
----@field text string|nil|fun(self: Label): string
-
----@param props NewLabelProps
-function Label.new(props)
-  local self = Component.new(props)
-  setmetatable(self, Label)
-  ---@cast self Label
-
-  self.props.type = "label"
-  self.props.text = props.text or ""
-
-  self.props.width = props.width or function(self) return #self:getProps("text") end
-  return self
-end
-
-function Label:setText(text)
-  self.props.text = text
-
-  return self
-end
-
-
----@param term ccTweaked.term.Redirect
-function Label:render(term)
-  local x = self:getProps("x")
-  local y = self:getProps("y")
-  local fg = self:getProps("fgColor", colors.white)
-  local bg = self:getProps("bgColor", colors.black)
-  local text = self:getProps("text")
-  term.setCursorPos(x, y)
-  term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))
-
-  -- labels shouldn't have children anyway
-  ---@todo remove
-  Component.render(self, term)
-end
-
-return Label
-
-end)
-return __bundle_require("__root")
+local _a,aa,ba,ca=(function(da)local _b={[{}]=true}local ab;local bb={}local cb;local db={}ab=function(_c,ac)
+if not bb[_c]then bb[_c]=ac end end
+cb=function(_c)local ac=db[_c]
+if ac then if ac==_b then
+return nil end else
+if not bb[_c]then
+if not da then local bc=
+type(_c)=='string'and'\"'.._c..'\"'or tostring(_c)
+error(
+'Tried to require '..bc..', but no such module has been registered')else return da(_c)end end;db[_c]=_b;ac=bb[_c](cb,db,ab,bb)db[_c]=ac end;return ac end;return cb,db,ab,bb end)(require)
+ba("__root",function(da,_b,ab,bb)
+local cb={Core=da("ccui.core"),Components=da("ccui.components"),Util=da("ccui.util"),new=da("ccui.core").new}return cb end)
+ba("ccui.core",function(da,_b,ab,bb)local cb=da("ccui.components.Component")
+local db=da("ccui.components.Frame")local _c=da("ccui.util")local ac={}ac.__index=ac;local bc=term
+function ac.new(cc)
+local dc=setmetatable({},ac)dc.term=cc or bc.current()
+dc.root=db.new({term=dc.term})dc.running=false;dc.events={}local _d=dc.events["alarm"]return dc end
+function ac:clearScreen()self.term.clear()
+self.term.setCursorPos(1,1)self.term.setTextColor(colors.white)
+self.term.setBackgroundColor(colors.black)end;function ac:renderUI()self:clearScreen()
+self.root:render(self.term)end
+function ac:addEventListener(cc,dc)if not self.events[cc]then
+self.events[cc]={}end
+table.insert(self.events[cc],dc)return self,dc end
+function ac:removeEventListener(cc,dc)if not self.events[cc]then return self end;for _d,ad in
+ipairs(self.events[cc])do
+if ad==dc then table.remove(self.events[cc],_d)break end end;return self end
+function ac:start()self.root:mount(self)self:renderUI()
+self.running=true
+while self.running do self:renderUI()local cc,dc,_d,ad=os.pullEvent()
+if
+self.events[cc]then for bd,cd in ipairs(self.events[cc])do cd(dc,_d,ad)end end end;self:clearScreen()return self end;function ac:stop()self.running=false;return self end;return ac end)
+ba("ccui.util",function(da,_b,ab,bb)local cb={}local db=0;function cb.generateUniqueId()db=db+1;return db end;function cb.pointInRect(_c,ac,bc)
+return
+
+_c>=bc.x and _c<=bc.x+bc.width-1 and ac>=bc.y and ac<=bc.y+bc.height-1 end;return cb end)
+ba("ccui.components.Frame",function(da,_b,ab,bb)local cb=da("ccui.components.Component")local db={}
+setmetatable(db,cb)db.__index=db
+function db.new(_c)local ac=cb.new(_c)setmetatable(ac,db)
+local bc,cc=term.getSize()ac.props.type="frame"ac.props.x=_c.x or 1
+ac.props.y=_c.y or 1;ac.props.width=_c.width or bc
+ac.props.height=_c.height or cc;return ac end
+function db:render(_c)local ac=self:getProps("x")local bc=self:getProps("y")
+local cc=self:getProps("bgColor")local dc=self:getProps("fgColor")
+local _d=self:getProps("width")local ad=self:getProps("height")_c.setCursorPos(ac,bc)if cc then
+_c.setBackgroundColor(cc)end;if dc then _c.setTextColor(dc)end;for i=1,ad do
+_c.write(string.rep(" ",_d))end;_c.setCursorPos(ac,bc)
+cb.render(self,_c)end;return db end)
+ba("ccui.components.Component",function(da,_b,ab,bb)local cb=da("ccui.util")local db={}db.__index=db
+function db.new(_c)
+local ac=setmetatable({},db)ac.props={}ac.props.type="component"ac.props.x=1;ac.props.y=1
+ac.props.width=1;ac.props.height=1;for bc,cc in pairs(_c)do ac.props[bc]=cc end;if
+_c.id==nil then
+ac.props.id=tostring(cb.generateUniqueId())end;ac.parent=nil;ac.children={}
+ac.eventListeners={}return ac end
+function db:findById(_c)if self:getProps("id")==_c then return self end
+for ac,bc in
+ipairs(self.children)do local cc=bc:findById(_c)if cc then return cc end end end
+function db:getProps(_c,ac)local bc=self.props[_c]if type(bc)=="function"then return bc(self)elseif
+bc==nil then return ac else return bc end end
+function db:add(_c)_c.parent=self;table.insert(self.children,_c)if self.core then
+_c:mount(self.core)end;return self end
+function db:mount(_c)self.core=_c;if self.eventListeners then
+for ac,bc in pairs(self.eventListeners)do for cc,dc in ipairs(bc)do
+_c:addEventListener(ac,dc)end end end;for ac,bc in
+ipairs(self.children)do bc:mount(_c)end end
+function db:unmount()
+if self.core and self.eventListeners then for _c,ac in pairs(self.eventListeners)do
+for bc,cc in
+ipairs(ac)do self.core:removeEventListener(_c,cc)end end end;for _c,ac in ipairs(self.children)do ac:unmount()end
+self.core=nil end
+function db:on(_c,ac)if not self.eventListeners[_c]then
+self.eventListeners[_c]={}end
+local bc=function(...)ac(self,...)end;table.insert(self.eventListeners[_c],bc)return
+self,bc end
+function db:off(_c,ac)if not self.eventListeners[_c]then return self end
+for bc,cc in
+ipairs(self.eventListeners[_c])do if cc==ac then
+table.remove(self.eventListeners[_c],bc)break end end;return self end
+function db:hitTest(_c,ac)return
+cb.pointInRect(_c,ac,{x=self:getProps("x"),y=self:getProps("y"),width=self:getProps("width"),height=self:getProps("height")})end
+function db:onClick(_c)
+self:on("mouse_click",function(ac,bc,cc,dc)
+if bc==1 and self:hitTest(cc,dc)then _c(self)end end)return self end
+function db:render(_c)local ac=self:getProps("x")local bc=self:getProps("y")
+local cc=self:getProps("bgColor")local dc=self:getProps("fgColor")if ac and bc then
+_c.setCursorPos(ac,bc)end;for _d,ad in ipairs(self.children)do if cc then
+_c.setBackgroundColor(cc)end;if dc then _c.setTextColor(dc)end
+ad:render(_c)end end;return db end)
+ba("ccui.components",function(da,_b,ab,bb)
+local cb={Component=da("ccui.components.Component"),Frame=da("ccui.components.Frame"),Label=da("ccui.components.Label"),Button=da("ccui.components.Button")}return cb end)
+ba("ccui.components.Button",function(da,_b,ab,bb)local cb=da("ccui.components.Component")local db={}
+setmetatable(db,cb)db.__index=db
+function db.new(_c)local ac=cb.new(_c)setmetatable(ac,db)
+ac.props.type="button"ac.props.text=_c.text or""
+ac.props.width=_c.width or function(bc)return
+#bc:getProps("text")+2 end;ac.props.height=_c.height or 1;return ac end
+function db:render(_c)local ac=self:getProps("bgColor",colors.white)
+local bc=self:getProps("fgColor",colors.black)local cc=self:getProps("x")local dc=self:getProps("y")
+local _d=self:getProps("width")local ad=self:getProps("height")
+local bd=self:getProps("text")local cd=dc+math.floor((ad-1)/2)
+_c.setBackgroundColor(ac)_c.setTextColor(bc)_c.setCursorPos(cc,dc)for i=1,ad do _c.setCursorPos(cc,
+dc+i-1)
+_c.write(string.rep(" ",_d))end;_c.setCursorPos(cc+1,cd)
+_c.write(bd)_c.setBackgroundColor(colors.black)
+_c.setTextColor(colors.white)cb.render(self,_c)end;return db end)
+ba("ccui.components.Label",function(da,_b,ab,bb)local cb=da("ccui.components.Component")local db={}
+setmetatable(db,cb)db.__index=db
+function db.new(_c)local ac=cb.new(_c)setmetatable(ac,db)
+ac.props.type="label"ac.props.text=_c.text or""
+ac.props.width=_c.width or function(bc)return
+#bc:getProps("text")end;return ac end;function db:setText(_c)self.props.text=_c;return self end
+function db:render(_c)
+local ac=self:getProps("x")local bc=self:getProps("y")
+local cc=self:getProps("fgColor",colors.white)local dc=self:getProps("bgColor",colors.black)
+local _d=self:getProps("text")_c.setCursorPos(ac,bc)
+_c.blit(_d,string.rep(colors.toBlit(cc),#_d),string.rep(colors.toBlit(dc),
+#_d))cb.render(self,_c)end;return db end)return _a("__root")
