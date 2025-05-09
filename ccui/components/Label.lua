@@ -20,6 +20,8 @@ function Label.new(props)
 
   self.props.type = "label"
   self.props.text = props.text or ""
+
+  self.props.width = props.width or function(self) return #self:getProps("text") end
   return self
 end
 

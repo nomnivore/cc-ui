@@ -10,7 +10,7 @@ setmetatable(Frame, Component)
 Frame.__index = Frame
 
 ---@class NewFrameProps : NewComponentProps
----@field term ccTweaked.term.Redirect
+---@field term ccTweaked.term.Redirect?
 
 --- Creates a new frame component, which is a container for other components.
 --- Also acts as a root component for an app.
