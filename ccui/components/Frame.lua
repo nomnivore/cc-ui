@@ -1,22 +1,21 @@
 local Component = require("ccui.components.Component")
 
+---@class FrameProps : ComponentProps
+---@field term ccTweaked.term.Redirect
+
 ---@class Frame : Component
----@field term term
----@field x number
----@field y number
----@field width number
----@field height number
+---@field props FrameProps
 local Frame = {}
 setmetatable(Frame, Component)
 Frame.__index = Frame
 
----@class FrameProps : ComponentProps
+---@class NewFrameProps : NewComponentProps
 ---@field term ccTweaked.term.Redirect
 
 --- Creates a new frame component, which is a container for other components.
 --- Also acts as a root component for an app.
 --- Defaults to the size of the terminal if no width/height are specified.
----@param props FrameProps
+---@param props NewFrameProps
 function Frame.new(props)
   local self = Component.new(props)
   setmetatable(self, Frame)
@@ -24,33 +23,40 @@ function Frame.new(props)
 
   local tW, tH = term.getSize()
 
-  self.type = "frame"
+  self.props.type = "frame"
 
-  self.x = props.x or 1
-  self.y = props.y or 1
-  self.width = props.width or tW
-  self.height = props.height or tH
+  self.props.x = props.x or 1
+  self.props.y = props.y or 1
+  self.props.width = props.width or tW
+  self.props.height = props.height or tH
 
   return self
 end
 
 ---@param term ccTweaked.term.Redirect
 function Frame:render(term)
-  term.setCursorPos(self.x, self.y)
-  if self.bgColor then
-    term.setBackgroundColor(self.bgColor)
+  local x = self:getProps("x")
+  local y = self:getProps("y")
+  local bgColor = self:getProps("bgColor")
+  local fgColor = self:getProps("fgColor")
+  local width = self:getProps("width")
+  local height = self:getProps("height")
+
+  term.setCursorPos(x, y)
+  if bgColor then
+    term.setBackgroundColor(bgColor)
   end
-  if self.fgColor then
-    term.setTextColor(self.fgColor)
+  if fgColor then
+    term.setTextColor(fgColor)
   end
 
   -- print entire width/height using bg color
-  for i = 1, self.height do
-    term.write(string.rep(" ", self.width))
+  for i = 1, height do
+    term.write(string.rep(" ", width))
   end
 
   -- reset cursor position
-  term.setCursorPos(self.x, self.y)
+  term.setCursorPos(x, y)
 
   -- render children
   Component.render(self, term)

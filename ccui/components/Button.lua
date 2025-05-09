@@ -1,48 +1,55 @@
 local Component = require("ccui.components.Component")
 
+---@class ButtonProps : ComponentProps
+---@field text string|fun(self: Button): string
+
 ---@class Button : Component
----@field text string
+---@field props ButtonProps
 local Button = {}
 setmetatable(Button, Component)
 Button.__index = Button
 
----@class ButtonProps : ComponentProps
----@field text string?
+---@class NewButtonProps : NewComponentProps
+---@field text string|nil|fun(self: Button): string
 
----@param props ButtonProps
+---@param props NewButtonProps
 function Button.new(props)
   local self = Component.new(props)
   setmetatable(self, Button)
   ---@cast self Button
   
-  self.type = "button"
-  self.text = props.text or ""
-  self.width = props.width or #self.text + 2
-  self.height = props.height or 1
+  self.props.type = "button"
+  self.props.text = props.text or ""
+  self.props.width = props.width or function(self) return #self:getProps("text") + 2 end
+  self.props.height = props.height or 1
 
   return self
 end
 
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
-  local bg = self.bgColor or colors.white
-  local fg = self.fgColor or colors.black
-  -- term.blit(self.text, string.rep(colors.toBlit(fg), #self.text), string.rep(colors.toBlit(bg), #self.text))
+  local bg = self:getProps("bgColor", colors.white)
+  local fg = self:getProps("fgColor", colors.black)
+  local x = self:getProps("x")
+  local y = self:getProps("y")
+  local width = self:getProps("width")
+  local height = self:getProps("height")
+  local text = self:getProps("text")
 
-  local labelY = self.y + math.floor((self.height - 1) / 2)
+  local labelY = y + math.floor((height - 1) / 2)
 
   term.setBackgroundColor(bg)
   term.setTextColor(fg)
 
-  term.setCursorPos(self.x, self.y)
+  term.setCursorPos(x, y)
   -- print entire width/height using bg color
-  for i = 1, self.height do
-    term.setCursorPos(self.x, self.y + i - 1)
-    term.write(string.rep(" ", self.width))
+  for i = 1, height do
+    term.setCursorPos(x, y + i - 1)
+    term.write(string.rep(" ", width))
   end
 
-  term.setCursorPos(self.x + 1, labelY)
-  term.write(self.text)
+  term.setCursorPos(x + 1, labelY)
+  term.write(text)
 
   term.setBackgroundColor(colors.black)
   term.setTextColor(colors.white)

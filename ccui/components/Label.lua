@@ -1,27 +1,30 @@
 local Component = require("ccui.components.Component")
 
+---@class LabelProps : ComponentProps
+---@field text string|fun(self: Label): string
+
 ---@class Label : Component
----@field text string
+---@field props LabelProps
 local Label = {}
 setmetatable(Label, Component)
 Label.__index = Label
 
----@class LabelProps : ComponentProps
----@field text string?
+---@class NewLabelProps : NewComponentProps
+---@field text string|nil|fun(self: Label): string
 
----@param props LabelProps
+---@param props NewLabelProps
 function Label.new(props)
   local self = Component.new(props)
   setmetatable(self, Label)
   ---@cast self Label
 
-  self.type = "label"
-  self.text = props.text or ""
+  self.props.type = "label"
+  self.props.text = props.text or ""
   return self
 end
 
 function Label:setText(text)
-  self.text = text
+  self.props.text = text
 
   return self
 end
@@ -29,10 +32,13 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Label:render(term)
-  term.setCursorPos(self.x, self.y)
-  local fg = self.fgColor or colors.white
-  local bg = self.bgColor or colors.black
-  term.blit(self.text, string.rep(colors.toBlit(fg), #self.text), string.rep(colors.toBlit(bg), #self.text))
+  local x = self:getProps("x")
+  local y = self:getProps("y")
+  local fg = self:getProps("fgColor", colors.white)
+  local bg = self:getProps("bgColor", colors.black)
+  local text = self:getProps("text")
+  term.setCursorPos(x, y)
+  term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))
 
   -- labels shouldn't have children anyway
   ---@todo remove

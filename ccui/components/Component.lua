@@ -1,44 +1,49 @@
 local Util = require("ccui.util")
 
+---@class ComponentProps
+---@field type string|fun(self: Component): string
+---@field x number|fun(self: Component): number
+---@field y number|fun(self: Component): number
+---@field width number|fun(self: Component): number
+---@field height number|fun(self: Component): number
+---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
+---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
+
 ---@class Component
----@field type string
----@field x number
----@field y number
----@field width number
----@field height number
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
 ---@field parent Component?
 ---@field children Component[]
 ---@field core Core?
 ---@field eventListeners table<string, table<string, EventFn>>
+---@field props ComponentProps @see getProps
 local Component = {}
 Component.__index = Component
 
----@class ComponentProps
----@field type string?
----@field x number?
----@field y number?
----@field width number?
----@field height number?
----@field bgColor ccTweaked.colors.color?
----@field fgColor ccTweaked.colors.color?
+---@class NewComponentProps
+---@field type string|nil|fun(self: Component): string
+---@field x number|nil|fun(self: Component): number
+---@field y number|nil|fun(self: Component): number
+---@field width number|nil|fun(self: Component): number
+---@field height number|nil|fun(self: Component): number
+---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
+---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 
 --- Creates a new component
----@param props ComponentProps
+---@param props NewComponentProps
 function Component.new(props)
   local self = setmetatable({}, Component)
 
   -- props with default values
-  self.type = "component"
-  self.x = 1
-  self.y = 1
-  self.width = 1
-  self.height = 1
+---@diagnostic disable-next-line: missing-fields
+  self.props = {}
+  self.props.type = "component"
+  self.props.x = 1
+  self.props.y = 1
+  self.props.width = 1
+  self.props.height = 1
 
   -- props defined in table arg
   for k, v in pairs(props) do
-    self[k] = v
+    self.props[k] = v
   end
 
   self.parent = nil
@@ -47,6 +52,21 @@ function Component.new(props)
 
 
   return self
+end
+
+--- Gets a prop value, evaluating functions if necessary
+---@param name string
+---@param defaultValue any?
+---@return any
+function Component:getProps(name, defaultValue)
+  local value = self.props[name]
+  if type(value) == "function" then
+      return value(self)
+  elseif value == nil then
+      return defaultValue
+  else
+      return value
+  end
 end
 
 --- Adds a child component to this component, mounting it if this component is mounted
@@ -141,7 +161,12 @@ end
 ---@param y number
 ---@return boolean
 function Component:hitTest(x, y)
-  return Util.pointInRect(x, y, self)
+  return Util.pointInRect(x, y, {
+    x = self:getProps("x"),
+    y = self:getProps("y"),
+    width = self:getProps("width"),
+    height = self:getProps("height"),
+  })
 end
 
 --- Adds an event listener for mouse clicks on the component
@@ -160,16 +185,21 @@ end
 --- Renders the component to the display
 ---@param term ccTweaked.term.Redirect
 function Component:render(term)
-  if self.x and self.y then
-    term.setCursorPos(self.x, self.y)
+  local x = self:getProps("x")
+  local y = self:getProps("y")
+  local bgColor = self:getProps("bgColor")
+  local fgColor = self:getProps("fgColor")
+
+  if x and y then
+    term.setCursorPos(x, y)
   end
 
   for _, child in ipairs(self.children) do
-    if self.bgColor then
-      term.setBackgroundColor(self.bgColor)
+    if bgColor then
+      term.setBackgroundColor(bgColor)
     end
-    if self.fgColor then
-      term.setTextColor(self.fgColor)
+    if fgColor then
+      term.setTextColor(fgColor)
     end
     child:render(term)
   end
