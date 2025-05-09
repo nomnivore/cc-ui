@@ -8,7 +8,7 @@ local Util = require("ccui.util")
 ---@field root Frame
 ---@field term ccTweaked.term.Redirect
 ---@field running boolean
----@field private events table<string, table<string, EventFn>>
+---@field private events table<ccTweaked.os.event, EventFn[]>
 local Core = {}
 Core.__index = Core
 
@@ -26,6 +26,9 @@ function Core.new(term)
     term = self.term,
   })
   self.running = false
+  self.events = {}
+  
+  local test = self.events["alarm"]
 
   return self
 end
@@ -42,47 +45,73 @@ function Core:renderUI()
   self.root:render(self.term)
 end
 
+---Adds an event listener to the core, which will now be checked for in the main event loop.
+---Returns the core and the callback function, which can be used to remove the listener.
 ---@param event string
----@param handler EventFn
----@return Core, integer
-function Core:addEventListener(event, handler)
+---@param callback EventFn
+---@return Core, EventFn
+function Core:addEventListener(event, callback)
   if not self.events[event] then
     self.events[event] = {}
   end
-  local id = Util.generateUniqueId()
+  table.insert(self.events[event], callback)
 
-  self.events[event][id] = handler
-
-  return self, id
+  return self, callback
 end
 
+---Removes an event listener from the core
+---@param event string
+---@param callback EventFn
+---@return Core
+function Core:removeEventListener(event, callback)
+  if not self.events[event] then
+    return self
+  end
+
+  for i, v in ipairs(self.events[event]) do
+    if v == callback then
+      table.remove(self.events[event], i)
+      break
+    end
+  end
+
+  return self
+end
+
+---Mounts the root component and starts the main event loop
 ---@return Core
 function Core:start()
   -- first render
+  self.root:mount(self)
   self:renderUI()
 
   self.running = true
   while self.running do
     self:renderUI()
     local event, param1, param2, param3 = os.pullEvent()
-
-    if event == "mouse_click" then
-      local component = self.root:findComponentAt(param2, param3)
-      if component and component.onClick then
-        ---@todo WARNING: this does not work for non-clickables nested inside clickables!
-        component:onClick()
-      end
-    elseif event == "char" then
-      if param1 == "q" then
-        self:stop()
+    if self.events[event] then
+      for _, callback in ipairs(self.events[event]) do
+        callback(param1, param2, param3)
       end
     end
+
+    -- if event == "char" then
+    --   if param1 == "q" then
+    --     self:stop()
+    --   end
+    -- end
   end
   self:clearScreen()
+
+  return self
 end
 
+---Stops the main event loop and unmounts the root component
+---@return Core
 function Core:stop()
   self.running = false
+
+  return self
 end
 
 return Core

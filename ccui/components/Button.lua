@@ -2,14 +2,12 @@ local Component = require("ccui.components.Component")
 
 ---@class Button : Component
 ---@field text string
----@field onClick fun(self: Button)
 local Button = {}
 setmetatable(Button, Component)
 Button.__index = Button
 
 ---@class ButtonProps : ComponentProps
 ---@field text string?
----@field onClick fun(self: Button)
 
 ---@param props ButtonProps
 function Button.new(props)
@@ -19,10 +17,8 @@ function Button.new(props)
   
   self.type = "button"
   self.text = props.text or ""
-  self.onClick = props.onClick or function(_) end
   self.width = props.width or #self.text + 2
   self.height = props.height or 1
-
 
   return self
 end
