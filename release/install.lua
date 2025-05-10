@@ -6,31 +6,49 @@ local DEV_BASE_URL = "https://raw.githubusercontent.com/nomnivore/cc-ui/main/ccu
 local INSTALL_DIR = "ccui"
 local MANIFEST_FILE = "https://raw.githubusercontent.com/nomnivore/cc-ui/main/manifest.json"
 
+--- Print text in a specified color
+--- @param text string|table
+--- @param color ccTweaked.colors.color
+local function printColor(text, color)
+	local oldColor = term.getTextColor()
+	term.setTextColor(color)
+	if type(text) == "table" then
+		for _, line in ipairs(text) do
+			print(tostring(line))
+		end
+	else
+		print(tostring(text))
+	end
+	term.setTextColor(oldColor)
+end
+
 --- Download a file from a URL.
 --- @param url string
 --- @param path string
 local function download(url, path)
-	print("Downloading: " .. url .. " to " .. path)
+	printColor("Downloading [" .. path .. "]", colors.blue)
 	local response = http.get(url)
 	if not response then
-		error("Failed to download " .. url .. ": No response")
+		term.setTextColor(colors.red)
+		error("Failed to download [" .. path .. "]: No response")
 	end
 
 	local body = response.readAll()
 	response.close()
 
 	if not body then
-		error("Failed to download " .. url .. ": Empty file")
+		term.setTextColor(colors.red)
+		error("Failed to download [" .. path .. "]: Empty file")
 	end
 
 	local file = io.open(path, "w")
 	if not file then
-		error("Failed to open file for writing: " .. path)
+		term.setTextColor(colors.red)
+		error("Failed to open file for writing: [" .. path .. "]")
 	end
 
 	file:write(body)
 	file:close()
-	print("Downloaded successfully.")
 end
 
 --- Create a directory
@@ -39,9 +57,10 @@ local function createDir(path)
 	if fs.exists(path) then
 		return
 	end
-	print("Creating directory: " .. path)
+	printColor("Creating directory: " .. path, colors.green)
 	fs.makeDir(path)
 	if not fs.exists(path) then
+		term.setTextColor(colors.red)
 		error("Failed to create directory: " .. path)
 	end
 end
@@ -50,13 +69,10 @@ end
 --- @param path string
 local function deletePath(path)
 	if fs.exists(path) then
-		print("Deleting existing path: " .. path)
-		if fs.isDir(path) then
-			fs.deleteDir(path)
-		else
-			fs.delete(path)
-		end
+		printColor("Deleting existing path: " .. path, colors.green)
+		fs.delete(path)
 		if fs.exists(path) then
+			term.setTextColor(colors.red)
 			error("Failed to delete: " .. path)
 		end
 	end
@@ -64,15 +80,15 @@ end
 
 --- Install the release version
 local function installRelease()
-	print("Installing CCUI (Release Version)...")
-	deletePath("ui.lua")
+	printColor("Installing CCUI (Release)...", colors.green)
+	deletePath("ccui.lua")
 	download(RELEASE_URL, "ccui.lua")
-	print("CCUI Release Version installed successfully!")
+	printColor("CCUI Release installed successfully!", colors.green)
 end
 
 --- Install the development version
 local function installDev()
-	print("Installing CCUI (Development Version)...")
+	printColor("Installing CCUI (Dev)...", colors.green)
 
 	deletePath(INSTALL_DIR)
 
@@ -83,6 +99,7 @@ local function installDev()
 	download(MANIFEST_FILE, "manifest.json")
 	local manifest_file = io.open("manifest.json", "r")
 	if not manifest_file then
+		term.setTextColor(colors.red)
 		error("Failed to open manifest file: " .. MANIFEST_FILE)
 	end
 	local manifest_content = manifest_file:read("*a")
@@ -93,6 +110,7 @@ local function installDev()
 
 	local manifest = textutils.unserializeJSON(manifest_content)
 	if not manifest or type(manifest) ~= "table" then
+		term.setTextColor(colors.red)
 		error("Failed to parse manifest file: " .. MANIFEST_FILE)
 	end
 
@@ -109,16 +127,22 @@ local function installDev()
 		end
 	end
 
-	print("CCUI Development Version installed successfully!")
+	printColor("CCUI (Dev) installed successfully!", colors.green)
 end
 
 --- Main function to handle installation process
 local function main()
-	print("Welcome to the CCUI Installer!")
-	print("This script will install the CCUI library for ComputerCraft.")
-	print("Choose which version to install:")
-	print("1. Release Version (Single file, optimized)")
-	print("2. Development Version (Full source, for development)")
+	printColor("Welcome to the CCUI Installer!", colors.green)
+
+	printColor(
+		{
+			"This script will install the CCUI library for ComputerCraft.",
+			"Choose which version to install:",
+			"1. Release (bundled, minified)",
+			"2. Development (full source with types)",
+		},
+		colors.yellow
+	)
 
 	local choice = read()
 	if choice == "1" then
@@ -126,7 +150,7 @@ local function main()
 	elseif choice == "2" then
 		installDev()
 	else
-		print("Invalid choice. Please run the installer again and enter '1' or '2'.")
+		printColor("Invalid choice. Please run the installer again and enter '1' or '2'.", colors.red)
 	end
 end
 
@@ -147,7 +171,7 @@ if #arg > 0 then
 		main()
 		return
 	else
-		print("Invalid argument. Use --release or --dev.")
+		printColor("Invalid argument. Use --release or --dev.", colors.red)
 		return
 	end
 end
