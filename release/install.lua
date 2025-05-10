@@ -140,13 +140,11 @@ if #arg > 0 then
 	elseif flag == "--dev" or flag == "-d" then
 		installDev()
 		return
+	elseif arg[1] == "run" and flag == nil then
+		main()
+		return
 	else
 		print("Invalid argument. Use --release or --dev.")
-		print("# args: " .. #arg)
-		print("args: ")
-		for i, v in ipairs(arg) do
-			print(i .. ": " .. v)
-		end
 		return
 	end
 end
