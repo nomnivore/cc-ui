@@ -66,7 +66,7 @@ end
 local function installRelease()
 	print("Installing CCUI (Release Version)...")
 	deletePath("ui.lua")
-	download(RELEASE_URL, "ui.lua")
+	download(RELEASE_URL, "ccui.lua")
 	print("CCUI Release Version installed successfully!")
 end
 
@@ -136,12 +136,15 @@ if #arg > 0 then
 	end
 	if flag == "--release" or flag == "-r" then
 		installRelease()
+		return
 	elseif flag == "--dev" or flag == "-d" then
 		installDev()
+		return
 	else
 		print("Invalid argument. Use --release or --dev.")
+		return
 	end
-else
-	--If no arguments, run interactive
-	main()
 end
+
+--If no arguments, run interactive
+main()
