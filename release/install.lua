@@ -135,6 +135,15 @@ if #arg > 0 then
 		installDev()
 	else
 		print("Invalid argument. Use --release or --dev.")
+		if arg[1] then
+			print(arg[1])
+		end
+		if arg[2] then
+			print(arg[2])
+		end
+		if arg[3] then
+			print(arg[3])
+		end
 	end
 else
 	--If no arguments, run interactive
