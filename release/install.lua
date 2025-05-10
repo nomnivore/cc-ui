@@ -128,22 +128,18 @@ local function main()
 end
 
 -- Check for command-line arguments (optional)
+-- for 'wget', the first arg is 'run' and the third arg is what we want to check
 if #arg > 0 then
-	if arg[1] == "--release" or arg[1] == "-r" then
+	local flag = arg[1]
+	if flag == "run" then
+		flag = arg[3]
+	end
+	if flag == "--release" or flag == "-r" then
 		installRelease()
-	elseif arg[1] == "--dev" or arg[1] == "-d" then
+	elseif flag == "--dev" or flag == "-d" then
 		installDev()
 	else
 		print("Invalid argument. Use --release or --dev.")
-		if arg[1] then
-			print(arg[1])
-		end
-		if arg[2] then
-			print(arg[2])
-		end
-		if arg[3] then
-			print(arg[3])
-		end
 	end
 else
 	--If no arguments, run interactive
