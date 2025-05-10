@@ -142,6 +142,11 @@ if #arg > 0 then
 		return
 	else
 		print("Invalid argument. Use --release or --dev.")
+		print("# args: " .. #arg)
+		print("args: ")
+		for i, v in ipairs(arg) do
+			print(i .. ": " .. v)
+		end
 		return
 	end
 end
