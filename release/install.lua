@@ -4,7 +4,7 @@
 local RELEASE_URL = "https://raw.githubusercontent.com/nomnivore/cc-ui/main/release/ui.lua"
 local DEV_BASE_URL = "https://raw.githubusercontent.com/nomnivore/cc-ui/main/ccui/"
 local INSTALL_DIR = "ccui"
-local MANIFEST_FILE = "manifest.json"
+local MANIFEST_FILE = "https://raw.githubusercontent.com/nomnivore/cc-ui/main/manifest.json"
 
 --- Download a file from a URL.
 --- @param url string
@@ -80,8 +80,8 @@ local function installDev()
 	createDir(INSTALL_DIR)
 
 	-- Download and parse the manifest file
-	download(DEV_BASE_URL .. MANIFEST_FILE, MANIFEST_FILE)
-	local manifest_file = io.open(MANIFEST_FILE, "r")
+	download(MANIFEST_FILE, "manifest.json")
+	local manifest_file = io.open("manifest.json", "r")
 	if not manifest_file then
 		error("Failed to open manifest file: " .. MANIFEST_FILE)
 	end
@@ -89,7 +89,7 @@ local function installDev()
 	manifest_file:close()
 
 	-- Remove the manifest file after reading it.
-	fs.delete(MANIFEST_FILE)
+	fs.delete("manifest.json")
 
 	local manifest = textutils.jsonDecode(manifest_content)
 
