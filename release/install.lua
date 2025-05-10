@@ -91,7 +91,10 @@ local function installDev()
 	-- Remove the manifest file after reading it.
 	fs.delete("manifest.json")
 
-	local manifest = textutils.jsonDecode(manifest_content)
+	local manifest = textutils.unserializeJSON(manifest_content)
+	if not manifest or type(manifest) ~= "table" then
+		error("Failed to parse manifest file: " .. MANIFEST_FILE)
+	end
 
 	-- Iterate through the manifest and download files/create directories
 	for _, entry in ipairs(manifest) do
