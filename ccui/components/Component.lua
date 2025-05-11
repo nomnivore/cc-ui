@@ -9,6 +9,7 @@ local Util = require("ccui.util")
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string
+---@field state table<string, any>
 
 ---@class Component
 ---@field parent Component?
@@ -88,6 +89,15 @@ function Component:getProps(name, defaultValue)
 	else
 		return value
 	end
+end
+
+--- Sets a prop value
+---@param name string
+---@param value any
+function Component:setProps(name, value)
+	self.props[name] = value
+
+	return self
 end
 
 --- Adds a child component to this component, mounting it if this component is mounted
@@ -175,6 +185,26 @@ function Component:off(event, callback)
 	end
 
 	return self
+end
+
+-- State management
+
+--- Sets a state value
+---@param key string
+---@param value any
+function Component:setState(key, value)
+	if not self.state then
+		self.state = {}
+	end
+
+	self.state[key] = value
+end
+
+--- Gets a state value
+---@param key string
+---@return any
+function Component:getState(key)
+	return self.state and self.state[key]
 end
 
 --- Tests if a point is inside the component's bounds
