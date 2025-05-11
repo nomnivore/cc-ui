@@ -30,10 +30,10 @@ local ui = require("ccui")
 local app = ui.new()
 
 app.root
-  :add(ui.components.Label.new{
+  :add(ui.Components.Label.new{
     text = "Hello World!",
   })
-  :add(ui.components.Button.new{
+  :add(ui.Components.Button.new{
     text = "Close",
     y = 3,
   }
