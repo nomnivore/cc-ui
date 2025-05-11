@@ -5,6 +5,10 @@
   },
   {
     "type": "file",
+    "url": "components/Checkbox.lua"
+  },
+  {
+    "type": "file",
     "url": "components/Component.lua"
   },
   {

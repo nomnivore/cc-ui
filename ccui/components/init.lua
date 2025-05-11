@@ -3,6 +3,7 @@ local exports = {
 	Frame = require("ccui.components.Frame"),
 	Label = require("ccui.components.Label"),
 	Button = require("ccui.components.Button"),
+	Checkbox = require("ccui.components.Checkbox"),
 }
 
 return exports
