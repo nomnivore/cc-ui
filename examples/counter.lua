@@ -1,3 +1,5 @@
+require("_path")
+
 -- Simple counter example app using ccui
 
 local UI = require("ccui")
