@@ -21,7 +21,9 @@ function Frame.new(props)
 	setmetatable(self, Frame)
 	---@cast self Frame
 
-	local tW, tH = term.getSize()
+	local scopedTerm = props.term or term
+
+	local tW, tH = scopedTerm.getSize()
 
 	self.props.type = "frame"
 
