@@ -54,6 +54,7 @@ function Frame:render(term)
 
 	-- print entire width/height using bg color
 	for i = 1, height do
+		term.setCursorPos(x, y + i - 1)
 		term.write(string.rep(" ", width))
 	end
 
