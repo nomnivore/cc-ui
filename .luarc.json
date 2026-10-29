@@ -1,0 +1,6 @@
+{
+  "runtime.version": "Lua 5.3",
+  "runtime.builtin": { "io": "disable", "os": "disable" },
+  "workspace.library": [".lls/cc-tweaked"],
+  "workspace.checkThirdParty": false
+}
