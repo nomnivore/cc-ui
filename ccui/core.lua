@@ -87,18 +87,14 @@ function Core:start()
 	self.running = true
 	while self.running do
 		self:renderUI()
-		local event, param1, param2, param3 = os.pullEvent()
+		local event, args = (function(e, ...)
+			return e, table.pack(...)
+		end)(os.pullEvent())
 		if self.events[event] then
 			for _, callback in ipairs(self.events[event]) do
-				callback(param1, param2, param3)
+				callback(table.unpack(args))
 			end
 		end
-
-		-- if event == "char" then
-		--   if param1 == "q" then
-		--     self:stop()
-		--   end
-		-- end
 	end
 	self:clearScreen()
 
