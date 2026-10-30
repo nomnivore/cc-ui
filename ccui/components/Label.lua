@@ -22,11 +22,9 @@ function Label.new(props)
 	self.props.type = "label"
 	self.props.text = props.text or ""
 
-	self.props.width = props.width
-		or function(self)
-			local content = tostring(self:getProps("text"))
-			return #content
-		end
+	self.props.width = props.width or function(self)
+		return #self:getText() + 2
+	end
 	return self
 end
 

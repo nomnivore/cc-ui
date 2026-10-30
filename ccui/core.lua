@@ -87,12 +87,11 @@ function Core:start()
 	self.running = true
 	while self.running do
 		self:renderUI()
-		local event, args = (function(e, ...)
-			return e, table.pack(...)
-		end)(os.pullEvent())
+		local eventData = table.pack(os.pullEvent())
+		local event = eventData[1]
 		if self.events[event] then
 			for _, callback in ipairs(self.events[event]) do
-				callback(table.unpack(args))
+				callback(table.unpack(eventData, 2, eventData.n))
 			end
 		end
 	end
