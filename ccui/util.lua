@@ -6,6 +6,7 @@ function Util.generateUniqueId()
 	return id
 end
 
+---@alias TextValue string|number
 ---@alias Rect {x: number, y: number, width: number, height: number}
 
 --- Checks if a point is inside a rectangle

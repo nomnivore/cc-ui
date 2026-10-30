@@ -1,7 +1,7 @@
 local Component = require("ccui.components.Component")
 
 ---@class ButtonProps : ComponentProps
----@field text string|fun(self: Button): string
+---@field text TextValue|fun(self: Button): TextValue
 
 ---@class Button : Component
 ---@field props ButtonProps
@@ -10,7 +10,7 @@ setmetatable(Button, Component)
 Button.__index = Button
 
 ---@class NewButtonProps : NewComponentProps
----@field text string|nil|fun(self: Button): string
+---@field text TextValue|nil|fun(self: Button): TextValue
 
 ---@param props NewButtonProps?
 function Button.new(props)
@@ -22,11 +22,21 @@ function Button.new(props)
 	self.props.type = "button"
 	self.props.text = props.text or ""
 	self.props.width = props.width or function(self)
-		return #self:getProps("text") + 2
+		return #self:getText() + 2
 	end
 	self.props.height = props.height or 1
 
 	return self
+end
+
+function Button:setText(text)
+	self:setProps("text", text)
+
+	return self
+end
+
+function Button:getText()
+	return tostring(self:getProps("text"))
 end
 
 ---@param term ccTweaked.term.Redirect
@@ -37,7 +47,7 @@ function Button:render(term)
 	local y = self:getProps("y")
 	local width = self:getProps("width")
 	local height = self:getProps("height")
-	local text = self:getProps("text")
+	local text = self:getText()
 
 	local labelY = y + math.floor((height - 1) / 2)
 

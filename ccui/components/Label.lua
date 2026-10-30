@@ -1,7 +1,7 @@
 local Component = require("ccui.components.Component")
 
 ---@class LabelProps : ComponentProps
----@field text string|fun(self: Label): string
+---@field text TextValue|fun(self: Label): TextValue
 
 ---@class Label : Component
 ---@field props LabelProps
@@ -10,7 +10,7 @@ setmetatable(Label, Component)
 Label.__index = Label
 
 ---@class NewLabelProps : NewComponentProps
----@field text string|nil|fun(self: Label): string
+---@field text TextValue|nil|fun(self: Label): TextValue
 
 ---@param props NewLabelProps?
 function Label.new(props)
@@ -22,16 +22,22 @@ function Label.new(props)
 	self.props.type = "label"
 	self.props.text = props.text or ""
 
-	self.props.width = props.width or function(self)
-		return #self:getProps("text")
-	end
+	self.props.width = props.width
+		or function(self)
+			local content = tostring(self:getProps("text"))
+			return #content
+		end
 	return self
 end
 
 function Label:setText(text)
-	self.props.text = text
+	self:setProps("text", text)
 
 	return self
+end
+
+function Label:getText()
+	return tostring(self:getProps("text"))
 end
 
 ---@param term ccTweaked.term.Redirect
@@ -40,7 +46,7 @@ function Label:render(term)
 	local y = self:getProps("y")
 	local fg = self:getProps("fgColor", colors.white)
 	local bg = self:getProps("bgColor", colors.black)
-	local text = self:getProps("text")
+	local text = self:getText()
 	term.setCursorPos(x, y)
 	term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))
 
