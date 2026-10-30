@@ -15,8 +15,9 @@ Frame.__index = Frame
 --- Creates a new frame component, which is a container for other components.
 --- Also acts as a root component for an app.
 --- Defaults to the size of the terminal if no width/height are specified.
----@param props NewFrameProps
+---@param props NewFrameProps?
 function Frame.new(props)
+	props = props or {}
 	local self = Component.new(props)
 	setmetatable(self, Frame)
 	---@cast self Frame

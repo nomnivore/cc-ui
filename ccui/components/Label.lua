@@ -12,8 +12,9 @@ Label.__index = Label
 ---@class NewLabelProps : NewComponentProps
 ---@field text string|nil|fun(self: Label): string
 
----@param props NewLabelProps
+---@param props NewLabelProps?
 function Label.new(props)
+	props = props or {}
 	local self = Component.new(props)
 	setmetatable(self, Label)
 	---@cast self Label

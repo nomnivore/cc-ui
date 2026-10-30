@@ -31,8 +31,9 @@ Component.__index = Component
 ---@field id string|nil
 
 --- Creates a new component
----@param props NewComponentProps
+---@param props NewComponentProps?
 function Component.new(props)
+	props = props or {}
 	local self = setmetatable({}, Component)
 
 	-- props with default values

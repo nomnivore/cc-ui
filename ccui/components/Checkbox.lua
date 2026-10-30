@@ -12,8 +12,9 @@ Checkbox.__index = Checkbox
 ---@class NewCheckboxProps : NewComponentProps
 ---@field checked boolean|nil|fun(self: Checkbox): boolean
 
----@param props NewCheckboxProps
+---@param props NewCheckboxProps?
 function Checkbox.new(props)
+	props = props or {}
 	local self = Component.new(props)
 	setmetatable(self, Checkbox)
 	---@cast self Checkbox

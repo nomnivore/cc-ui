@@ -12,8 +12,9 @@ Button.__index = Button
 ---@class NewButtonProps : NewComponentProps
 ---@field text string|nil|fun(self: Button): string
 
----@param props NewButtonProps
+---@param props NewButtonProps?
 function Button.new(props)
+	props = props or {}
 	local self = Component.new(props)
 	setmetatable(self, Button)
 	---@cast self Button
