@@ -1,19 +1,15 @@
 [
   {
     "type": "file",
+    "url": "components/Frame.lua"
+  },
+  {
+    "type": "file",
     "url": "components/Button.lua"
   },
   {
     "type": "file",
-    "url": "components/Checkbox.lua"
-  },
-  {
-    "type": "file",
     "url": "components/Component.lua"
-  },
-  {
-    "type": "file",
-    "url": "components/Frame.lua"
   },
   {
     "type": "file",
@@ -25,11 +21,15 @@
   },
   {
     "type": "file",
-    "url": "core.lua"
+    "url": "components/Checkbox.lua"
   },
   {
     "type": "file",
     "url": "init.lua"
+  },
+  {
+    "type": "file",
+    "url": "core.lua"
   },
   {
     "type": "file",
