@@ -80,22 +80,30 @@ end
 ---Mounts the root component and starts the main event loop
 ---@return Core
 function Core:start()
-	-- first render
 	self.root:mount(self)
-	self:renderUI()
 
 	self.running = true
-	while self.running do
-		self:renderUI()
-		local eventData = table.pack(os.pullEvent())
-		local event = eventData[1]
-		if self.events[event] then
-			for _, callback in ipairs(self.events[event]) do
-				callback(table.unpack(eventData, 2, eventData.n))
+	local ok, err = pcall(function()
+		while self.running do
+			self:renderUI()
+			-- pullEventRaw catches "terminate" event for ctrl+T
+			-- if we want apps to be able to intercept it.
+			-- NOT implemented yet. ctrl+T uses normal behaviour.
+			local eventData = table.pack(os.pullEvent())
+			local event = eventData[1]
+			if self.events[event] then
+				for _, callback in ipairs(self.events[event]) do
+					callback(table.unpack(eventData, 2, eventData.n))
+				end
 			end
 		end
-	end
+	end)
+	self.running = false
 	self:clearScreen()
+	-- rethrow errors after cleanup
+	if not ok then
+		error(err, 0)
+	end
 
 	return self
 end
