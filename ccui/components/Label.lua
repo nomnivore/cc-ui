@@ -23,7 +23,7 @@ function Label.new(props)
 	self.props.text = props.text or ""
 
 	self.props.width = props.width or function(self)
-		return #self:getText() + 2
+		return #self:getText()
 	end
 	return self
 end
