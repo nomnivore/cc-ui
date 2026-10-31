@@ -29,12 +29,14 @@ function Button.new(props)
 	return self
 end
 
+---@param text string
 function Button:setText(text)
 	self:setProps("text", text)
 
 	return self
 end
 
+---@return string
 function Button:getText()
 	return tostring(self:getProps("text"))
 end
