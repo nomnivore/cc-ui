@@ -28,14 +28,14 @@ function Label.new(props)
 	return self
 end
 
----@param text string
+---@param text TextValue|fun(self: Label): TextValue
 function Label:setText(text)
 	self:setProps("text", text)
 
 	return self
 end
 
----@return string
+---@return TextValue|fun(self: Label): TextValue
 function Label:getText()
 	return tostring(self:getProps("text"))
 end
