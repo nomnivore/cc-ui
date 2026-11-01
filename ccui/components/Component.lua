@@ -30,6 +30,11 @@ Component.__index = Component
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string|nil
 
+local INHERITABLE_PROPS = {
+	bgColor = true,
+	fgColor = true,
+}
+
 --- Creates a new component
 ---@param props NewComponentProps?
 function Component.new(props)
@@ -86,6 +91,9 @@ function Component:getProps(name, defaultValue)
 	if type(value) == "function" then
 		return value(self)
 	elseif value == nil then
+		if INHERITABLE_PROPS[name] then
+			return self.parent:getProps(name)
+		end
 		return defaultValue
 	else
 		return value
