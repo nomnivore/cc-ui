@@ -36,7 +36,7 @@ function Button:setText(text)
 	return self
 end
 
----@return TextValue|fun(self: Button): TextValue
+---@return string
 function Button:getText()
 	return tostring(self:getProps("text"))
 end

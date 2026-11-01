@@ -35,7 +35,7 @@ function Label:setText(text)
 	return self
 end
 
----@return TextValue|fun(self: Label): TextValue
+---@return string
 function Label:getText()
 	return tostring(self:getProps("text"))
 end
