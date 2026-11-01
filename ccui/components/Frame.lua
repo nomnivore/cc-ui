@@ -46,12 +46,8 @@ function Frame:render(term)
 	local height = self:getProps("height")
 
 	term.setCursorPos(x, y)
-	if bgColor then
-		term.setBackgroundColor(bgColor)
-	end
-	if fgColor then
-		term.setTextColor(fgColor)
-	end
+	term.setBackgroundColor(bgColor)
+	term.setTextColor(fgColor)
 
 	-- print entire width/height using bg color
 	for i = 1, height do
