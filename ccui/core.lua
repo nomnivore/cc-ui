@@ -23,11 +23,13 @@ function Core.new(term)
 	self.term = term or ccterm.current()
 	self.root = Frame.new({
 		term = self.term,
+		-- inherited properties found in ./components/Component.lua
+		-- should have defaults defined here
+		bgColor = colors.black,
+		fgColor = colors.white,
 	})
 	self.running = false
 	self.events = {}
-
-	local test = self.events["alarm"]
 
 	return self
 end
