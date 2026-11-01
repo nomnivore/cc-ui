@@ -7,6 +7,7 @@ local Frame = require("ccui.components.Frame")
 ---@field term ccTweaked.term.Redirect
 ---@field running boolean
 ---@field private events table<ccTweaked.os.event, EventFn[]>
+---@field private buffer ccTweaked.Window
 local Core = {}
 Core.__index = Core
 
@@ -28,6 +29,8 @@ function Core.new(term)
 	})
 	self.running = false
 	self.events = {}
+	local w, h = self.term.getSize()
+	self.buffer = window.create(self.term, 1, 1, w, h, false)
 
 	return self
 end
@@ -40,8 +43,9 @@ function Core:clearScreen()
 end
 
 function Core:renderUI()
-	self:clearScreen()
-	self.root:render(self.term)
+	self.buffer.setVisible(false)
+	self.root:render(self.buffer)
+	self.buffer.setVisible(true)
 end
 
 ---Adds an event listener to the core, which will now be checked for in the main event loop.
