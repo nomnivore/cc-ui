@@ -67,8 +67,6 @@ function Button:render(term)
 
 	term.setCursorPos(x + 1, labelY)
 	term.write(text)
-
-	Component.render(self, term)
 end
 
 return Button

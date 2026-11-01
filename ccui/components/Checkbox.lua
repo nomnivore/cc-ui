@@ -62,10 +62,6 @@ function Checkbox:render(term)
 	local checked = self:getProps("checked")
 	term.setCursorPos(x, y)
 	term.blit(checked and "[x]" or "[ ]", string.rep(colors.toBlit(fgColor), 3), string.rep(colors.toBlit(bgColor), 3))
-
-	-- checkboxes shouldn't have children anyway
-	---@todo remove
-	Component.render(self, term)
 end
 
 return Checkbox

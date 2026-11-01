@@ -49,10 +49,6 @@ function Label:render(term)
 	local text = self:getText()
 	term.setCursorPos(x, y)
 	term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))
-
-	-- labels shouldn't have children anyway
-	---@todo remove
-	Component.render(self, term)
 end
 
 return Label

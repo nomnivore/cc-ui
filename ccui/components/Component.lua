@@ -110,19 +110,6 @@ function Component:setProps(name, value)
 	return self
 end
 
---- Adds a child component to this component, mounting it if this component is mounted
----@param child Component
-function Component:add(child)
-	child.parent = self
-	table.insert(self.children, child)
-
-	if self.core then
-		child:mount(self.core)
-	end
-
-	return self
-end
-
 -- Event handling
 
 --- Mounts this component and all children to a core, adding its event listeners
@@ -259,19 +246,9 @@ function Component:onClick(callback)
 	return self
 end
 
---- Renders the component to the display
+--- Render the component to the display
+--- Abstract method. Subclasses override.
 ---@param term ccTweaked.term.Redirect
-function Component:render(term)
-	local x = self:getProps("x")
-	local y = self:getProps("y")
-
-	if x and y then
-		term.setCursorPos(x, y)
-	end
-
-	for _, child in ipairs(self.children) do
-		child:render(term)
-	end
-end
+function Component:render(term) end
 
 return Component

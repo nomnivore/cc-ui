@@ -36,6 +36,19 @@ function Frame.new(props)
 	return self
 end
 
+--- Adds a child component to this component, mounting it if this component is mounted
+---@param child Component
+function Frame:add(child)
+	child.parent = self
+	table.insert(self.children, child)
+
+	if self.core then
+		child:mount(self.core)
+	end
+
+	return self
+end
+
 ---@param term ccTweaked.term.Redirect
 function Frame:render(term)
 	local x = self:getProps("x")
@@ -54,7 +67,11 @@ function Frame:render(term)
 	win.clear()
 
 	-- render children
-	Component.render(self, win)
+	for _, child in ipairs(self.children) do
+		-- Default position
+		win.setCursorPos(1,1)
+		child:render(win)
+	end
 end
 
 return Frame
