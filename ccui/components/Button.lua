@@ -25,6 +25,8 @@ function Button.new(props)
 		return #self:getText() + 2
 	end
 	self.props.height = props.height or 1
+	self.props.bgColor = props.bgColor or colors.white
+	self.props.fgColor = props.fgColor or colors.black
 
 	return self
 end
