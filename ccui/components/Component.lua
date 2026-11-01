@@ -91,8 +91,8 @@ function Component:getProps(name, defaultValue)
 	if type(value) == "function" then
 		return value(self)
 	elseif value == nil then
-		if INHERITABLE_PROPS[name] then
-			return self.parent:getProps(name)
+		if INHERITABLE_PROPS[name] and self.parent then
+			return self.parent:getProps(name) or defaultValue
 		end
 		return defaultValue
 	else
@@ -247,20 +247,12 @@ end
 function Component:render(term)
 	local x = self:getProps("x")
 	local y = self:getProps("y")
-	local bgColor = self:getProps("bgColor")
-	local fgColor = self:getProps("fgColor")
 
 	if x and y then
 		term.setCursorPos(x, y)
 	end
 
 	for _, child in ipairs(self.children) do
-		if bgColor then
-			term.setBackgroundColor(bgColor)
-		end
-		if fgColor then
-			term.setTextColor(fgColor)
-		end
 		child:render(term)
 	end
 end
