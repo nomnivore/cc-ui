@@ -1,6 +1,4 @@
-local Component = require("ccui.components.Component")
 local Frame = require("ccui.components.Frame")
-local Util = require("ccui.util")
 
 ---@alias EventFn fun(self: Component, ...)
 
