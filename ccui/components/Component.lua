@@ -89,10 +89,12 @@ end
 function Component:getProps(name, defaultValue)
 	local value = self.props[name]
 	if type(value) == "function" then
-		return value(self)
-	elseif value == nil then
+		value = value(self)
+	end
+	---@cast value unknown|nil
+	if value == nil then
 		if INHERITABLE_PROPS[name] and self.parent then
-			return self.parent:getProps(name) or defaultValue
+			return self.parent:getProps(name, defaultValue)
 		end
 		return defaultValue
 	else
