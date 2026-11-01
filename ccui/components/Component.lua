@@ -9,7 +9,6 @@ local Util = require("ccui.util")
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string
----@field state table<string, any>
 
 ---@class Component
 ---@field parent Component?
@@ -17,6 +16,7 @@ local Util = require("ccui.util")
 ---@field core Core?
 ---@field eventListeners table<string, table<string, EventFn>>
 ---@field props ComponentProps @see getProps
+---@field state table<string, any>
 local Component = {}
 Component.__index = Component
 
@@ -29,6 +29,7 @@ Component.__index = Component
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string|nil
+---@field state table<string, any>|nil
 
 local INHERITABLE_PROPS = {
 	bgColor = true,
@@ -51,8 +52,17 @@ function Component.new(props)
 	self.props.height = 1
 
 	-- props defined in table arg
+	-- 'state' is handled differently.
 	for k, v in pairs(props) do
-		self.props[k] = v
+		if k ~= "state" then
+			self.props[k] = v
+		end
+	end
+
+	if props.state then
+		for k, v in pairs(props.state) do
+			self:setState(k, v)
+		end
 	end
 
 	if props.id == nil then

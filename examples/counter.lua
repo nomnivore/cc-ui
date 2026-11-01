@@ -18,10 +18,15 @@ app.root
 		y = 1,
 	}))
 	:add(c.Label.new({
-		text = "0",
+		text = function(self)
+			return self:getState("count")
+		end,
 		x = centeredHorizontally,
 		y = 2,
 		id = "count",
+		state = {
+			count = 0,
+		},
 	}))
 	:add(c.Button
 		.new({
@@ -34,7 +39,11 @@ app.root
 			fgColor = colors.white,
 		})
 		:onClick(function()
-			app.root:findById("count").props.text = tostring(tonumber(app.root:findById("count"):getProps("text")) + 1)
+			local el = app.root:findById("count")
+			if not el then
+				return
+			end
+			el:setState("count", el:getState("count") + 1)
 		end))
 	:add(c.Button
 		.new({
@@ -47,7 +56,11 @@ app.root
 			fgColor = colors.white,
 		})
 		:onClick(function()
-			app.root:findById("count").props.text = tostring(tonumber(app.root:findById("count"):getProps("text")) - 1)
+			local el = app.root:findById("count")
+			if not el then
+				return
+			end
+			el:setState("count", el:getState("count") - 1)
 		end))
 	:add(c.Button
 		.new({
@@ -71,15 +84,15 @@ app:addEventListener("char", function(key)
 end)
 
 app:addEventListener("key", function(key)
-	local countComponent = app.root:findById("count")
-	if countComponent == nil then
+	local countEl = app.root:findById("count")
+	if countEl == nil then
 		return
 	end
-	---@cast countComponent Label
+	---@cast countEl Label
 	if key == keys.j then
-		countComponent.props.text = tostring(tonumber(countComponent:getProps("text")) - 1)
+		countEl:setState("count", countEl:getState("count") - 1)
 	elseif key == keys.k then
-		countComponent.props.text = tostring(tonumber(countComponent:getProps("text")) + 1)
+		countEl:setState("count", countEl:getState("count") + 1)
 	end
 end)
 
