@@ -33,10 +33,10 @@ function Core.new(term)
 end
 
 function Core:clearScreen()
-	self.term.clear()
-	self.term.setCursorPos(1, 1)
 	self.term.setTextColor(colors.white)
 	self.term.setBackgroundColor(colors.black)
+	self.term.clear()
+	self.term.setCursorPos(1, 1)
 end
 
 function Core:renderUI()
