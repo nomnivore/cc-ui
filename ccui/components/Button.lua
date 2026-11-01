@@ -66,9 +66,6 @@ function Button:render(term)
 	term.setCursorPos(x + 1, labelY)
 	term.write(text)
 
-	term.setBackgroundColor(colors.black)
-	term.setTextColor(colors.white)
-
 	Component.render(self, term)
 end
 
