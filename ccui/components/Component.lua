@@ -91,7 +91,6 @@ function Component:getProps(name, defaultValue)
 	if type(value) == "function" then
 		value = value(self)
 	end
-	---@cast value unknown|nil
 	if value == nil then
 		if INHERITABLE_PROPS[name] and self.parent then
 			return self.parent:getProps(name, defaultValue)
