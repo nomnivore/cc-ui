@@ -45,8 +45,8 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
-	local bg = self:getProps("bgColor", colors.white)
-	local fg = self:getProps("fgColor", colors.black)
+	local bg = self:getProps("bgColor")
+	local fg = self:getProps("fgColor")
 	local x = self:getProps("x")
 	local y = self:getProps("y")
 	local width = self:getProps("width")
