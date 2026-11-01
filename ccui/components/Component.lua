@@ -247,7 +247,7 @@ function Component:onClick(callback)
 end
 
 --- Render the component to the display
---- Abstract method. Subclasses override.
+--- Empty by default
 ---@param term ccTweaked.term.Redirect
 function Component:render(term) end
 

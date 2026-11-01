@@ -68,8 +68,11 @@ function Frame:render(term)
 
 	-- render children
 	for _, child in ipairs(self.children) do
-		-- Default position
-		win.setCursorPos(1,1)
+		-- sane defaults
+		win.setCursorPos(1, 1)
+		win.setBackgroundColor(bgColor)
+		win.setTextColor(fgColor)
+
 		child:render(win)
 	end
 end
