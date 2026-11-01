@@ -44,6 +44,13 @@ end
 
 function Core:renderUI()
 	self.buffer.setVisible(false)
+	-- resize the buffer, if needed
+	local rootW, rootH = self.root:getSize()
+	local bufW, bufH = self.buffer.getSize()
+	if rootW ~= bufW or rootH ~= bufH then
+		self.buffer.reposition(1, 1, rootW, rootH)
+	end
+
 	self.root:render(self.buffer)
 	self.buffer.setVisible(true)
 end

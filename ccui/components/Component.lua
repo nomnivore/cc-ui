@@ -120,6 +120,13 @@ function Component:setProps(name, value)
 	return self
 end
 
+--- Gets the size of the component
+---@return integer width
+---@return integer height
+function Component:getSize()
+	return self:getProps("width", 0), self:getProps("height", 0)
+end
+
 -- Event handling
 
 --- Mounts this component and all children to a core, adding its event listeners

@@ -12,9 +12,26 @@ Frame.__index = Frame
 ---@class NewFrameProps : NewComponentProps
 ---@field term ccTweaked.term.Redirect?
 
+---@param frame Frame
+local function defaultSize(frame)
+	-- use 'term' prop if present, otherwise use parent size
+	---@type ccTweaked.term.Redirect?
+	local t = frame:getProps("term")
+
+	if t then
+		return t.getSize()
+	end
+
+	if not frame.parent then
+		return 0, 0
+	end
+
+	return frame.parent:getProps("width", 0), frame.parent:getProps("height", 0)
+end
+
 --- Creates a new frame component, which is a container for other components.
 --- Also acts as a root component for an app.
---- Defaults to the size of the terminal if no width/height are specified.
+--- Size defaults to the remaining space in the parent window/terminal if no width/height are given
 ---@param props NewFrameProps?
 function Frame.new(props)
 	props = props or {}
@@ -22,16 +39,22 @@ function Frame.new(props)
 	setmetatable(self, Frame)
 	---@cast self Frame
 
-	local scopedTerm = props.term or term
-
-	local tW, tH = scopedTerm.getSize()
-
 	self.props.type = "frame"
 
 	self.props.x = props.x or 1
 	self.props.y = props.y or 1
-	self.props.width = props.width or tW
-	self.props.height = props.height or tH
+	self.props.width = props.width
+		or function(s)
+			---@cast s Frame
+			local w = defaultSize(s)
+			return w - s:getProps("x") + 1
+		end
+	self.props.height = props.height
+		or function(s)
+			---@cast s Frame
+			local _, h = defaultSize(s)
+			return h - s:getProps("y") + 1
+		end
 
 	return self
 end
