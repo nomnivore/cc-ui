@@ -66,7 +66,9 @@ app.root
 		.new({
 			text = "Exit Program",
 			x = centeredHorizontally,
-			y = app.root:getProps("height") - 1,
+			y = function()
+				return app.root:getProps("height") - 1
+			end,
 		})
 		:onClick(function()
 			app:stop()
@@ -74,7 +76,9 @@ app.root
 	:add(c.Label.new({
 		text = "'k' to increment, 'j' to decrement, 'q' to quit",
 		x = centeredHorizontally,
-		y = app.root:getProps("height"),
+		y = function()
+			return app.root:getProps("height")
+		end,
 	}))
 
 app:addEventListener("char", function(key)
