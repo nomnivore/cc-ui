@@ -80,6 +80,9 @@ end
 ---Mounts the root component and starts the main event loop
 ---@return Core
 function Core:start()
+	-- normalize the terminal colors and content
+	self:clearScreen()
+
 	self.root:mount(self)
 
 	self.running = true
