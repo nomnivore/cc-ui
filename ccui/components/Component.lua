@@ -217,14 +217,30 @@ function Component:getState(key)
 	return self.state and self.state[key]
 end
 
+--- Get the component's absolute screen position
+--- (x, y)
+---@return number, number
+function Component:getScreenPos()
+	local x = self:getProps("x")
+	local y = self:getProps("y")
+
+	if self.parent then
+		local pX, pY = self.parent:getScreenPos()
+		return x + pX - 1, y + pY - 1
+	end
+
+	return x, y
+end
+
 --- Tests if a point is inside the component's bounds
 ---@param x number
 ---@param y number
 ---@return boolean
 function Component:hitTest(x, y)
+	local posX, posY = self:getScreenPos()
 	return Util.pointInRect(x, y, {
-		x = self:getProps("x"),
-		y = self:getProps("y"),
+		x = posX,
+		y = posY,
 		width = self:getProps("width"),
 		height = self:getProps("height"),
 	})

@@ -45,21 +45,16 @@ function Frame:render(term)
 	local width = self:getProps("width")
 	local height = self:getProps("height")
 
-	term.setCursorPos(x, y)
-	term.setBackgroundColor(bgColor)
-	term.setTextColor(fgColor)
+	-- window scopes the frame & its children to its defined space
+	local win = window.create(term, x, y, width, height)
+	win.setBackgroundColor(bgColor)
+	win.setTextColor(fgColor)
 
-	-- print entire width/height using bg color
-	for i = 1, height do
-		term.setCursorPos(x, y + i - 1)
-		term.write(string.rep(" ", width))
-	end
-
-	-- reset cursor position
-	term.setCursorPos(x, y)
+	-- fills background color
+	win.clear()
 
 	-- render children
-	Component.render(self, term)
+	Component.render(self, win)
 end
 
 return Frame
