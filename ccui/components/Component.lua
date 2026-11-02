@@ -40,6 +40,8 @@ Component.__index = Component
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string|nil
 ---@field state table<string, any>|nil
+---@field onClick UIEventFn|nil
+---@field onRightClick UIEventFn|nil
 
 local INHERITABLE_PROPS = {
 	bgColor = true,
@@ -61,10 +63,17 @@ function Component.new(props)
 	self.props.width = 1
 	self.props.height = 1
 
+	self.parent = nil
+	self.children = {}
+	self.handlers = {}
+
 	-- props defined in table arg
 	-- 'state' is handled differently.
 	for k, v in pairs(props) do
-		if k ~= "state" then
+		if string.match(k, "^on%u") and type(v) == "function" then
+			local eventKey = string.sub(k, 3, 3):lower() .. string.sub(k, 4)
+			self:on(eventKey, v)
+		elseif k ~= "state" then
 			self.props[k] = v
 		end
 	end
@@ -78,10 +87,6 @@ function Component.new(props)
 	if props.id == nil then
 		self.props.id = tostring(Util.generateUniqueId())
 	end
-
-	self.parent = nil
-	self.children = {}
-	self.handlers = {}
 
 	return self
 end
