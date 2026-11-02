@@ -11,7 +11,7 @@ if peripheral.getType("top") == "monitor" then
 	target = monitor
 end
 
-local app = UI.App.new(target)
+local app = UI.App.new({ term = target })
 
 local value = 0
 app.root:setProp("bgColor", colors.green)
@@ -95,7 +95,6 @@ app.root:add(c.Frame
 				return self.parent:getProp("height")
 			end,
 		}))))
-
 
 app:addEventListener("char", function(key)
 	if key == "q" then
