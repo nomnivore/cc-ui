@@ -5,7 +5,7 @@ require("_path")
 local UI = require("ccui")
 local c = UI.Components
 
-local app = UI.new()
+local app = UI.App.new()
 
 local function centeredHorizontally(self)
 	return math.floor((self.parent:getProp("width") - self:getProp("width")) / 2)

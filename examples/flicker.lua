@@ -5,7 +5,7 @@ local c = UI.Components
 
 local INTERVAL = 0.05 -- one game tick
 
-local app = UI.new()
+local app = UI.App.new()
 local width = app.root:getProp("width")
 local height = app.root:getProp("height")
 local frames = 0

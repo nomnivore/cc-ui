@@ -14,7 +14,7 @@ require("_path")
 local UI = require("ccui")
 local c = UI.Components
 
-local app = UI.new()
+local app = UI.App.new()
 
 local counts = { A = 0, B = 0, clipBtn = 0, clipFrame = 0, bubBtn = 0, bubFrame = 0, late = 0, off = 0 }
 local bubbleTarget = "-"

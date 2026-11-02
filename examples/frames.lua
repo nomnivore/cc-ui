@@ -11,7 +11,7 @@ if peripheral.getType("top") == "monitor" then
 	target = monitor
 end
 
-local app = UI.new(target)
+local app = UI.App.new(target)
 
 local value = 0
 app.root:setProp("bgColor", colors.green)

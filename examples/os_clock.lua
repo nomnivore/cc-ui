@@ -3,7 +3,7 @@ require("_path")
 local UI = require("ccui")
 local c = UI.Components
 
-local app = UI.new()
+local app = UI.App.new()
 
 -- app.root:setProp("bgColor", colors.green)
 
