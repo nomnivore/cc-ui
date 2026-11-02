@@ -30,22 +30,22 @@ end
 
 ---@param text TextValue|fun(self: Label): TextValue
 function Label:setText(text)
-	self:setProps("text", text)
+	self:setProp("text", text)
 
 	return self
 end
 
 ---@return string
 function Label:getText()
-	return tostring(self:getProps("text"))
+	return tostring(self:getProp("text"))
 end
 
 ---@param term ccTweaked.term.Redirect
 function Label:render(term)
-	local x = self:getProps("x")
-	local y = self:getProps("y")
-	local fg = self:getProps("fgColor")
-	local bg = self:getProps("bgColor")
+	local x = self:getProp("x")
+	local y = self:getProp("y")
+	local fg = self:getProp("fgColor")
+	local bg = self:getProp("bgColor")
 	local text = self:getText()
 	term.setCursorPos(x, y)
 	term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))

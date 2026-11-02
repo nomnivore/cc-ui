@@ -6,11 +6,11 @@ local c = UI.Components
 local INTERVAL = 0.05 -- one game tick
 
 local app = UI.new()
-local width = app.root:getProps("width")
-local height = app.root:getProps("height")
+local width = app.root:getProp("width")
+local height = app.root:getProp("height")
 local frames = 0
 
-app.root:setProps("bgColor", colors.blue)
+app.root:setProp("bgColor", colors.blue)
 
 -- a large block of contrasting colour, so tearing between layers is easy to spot
 app.root:add(c.Frame.new({

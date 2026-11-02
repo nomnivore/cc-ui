@@ -16,7 +16,7 @@ Frame.__index = Frame
 local function defaultSize(frame)
 	-- use 'term' prop if present, otherwise use parent size
 	---@type ccTweaked.term.Redirect?
-	local t = frame:getProps("term")
+	local t = frame:getProp("term")
 
 	if t then
 		return t.getSize()
@@ -26,7 +26,7 @@ local function defaultSize(frame)
 		return 0, 0
 	end
 
-	return frame.parent:getProps("width", 0), frame.parent:getProps("height", 0)
+	return frame.parent:getProp("width", 0), frame.parent:getProp("height", 0)
 end
 
 --- Creates a new frame component, which is a container for other components.
@@ -47,13 +47,13 @@ function Frame.new(props)
 		or function(s)
 			---@cast s Frame
 			local w = defaultSize(s)
-			return w - s:getProps("x") + 1
+			return w - s:getProp("x") + 1
 		end
 	self.props.height = props.height
 		or function(s)
 			---@cast s Frame
 			local _, h = defaultSize(s)
-			return h - s:getProps("y") + 1
+			return h - s:getProp("y") + 1
 		end
 
 	return self
@@ -96,12 +96,12 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Frame:render(term)
-	local x = self:getProps("x")
-	local y = self:getProps("y")
-	local bgColor = self:getProps("bgColor")
-	local fgColor = self:getProps("fgColor")
-	local width = self:getProps("width")
-	local height = self:getProps("height")
+	local x = self:getProp("x")
+	local y = self:getProp("y")
+	local bgColor = self:getProp("bgColor")
+	local fgColor = self:getProp("fgColor")
+	local width = self:getProp("width")
+	local height = self:getProp("height")
 
 	-- window scopes the frame & its children to its defined space
 	local win = window.create(term, x, y, width, height)

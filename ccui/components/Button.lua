@@ -33,24 +33,24 @@ end
 
 ---@param text TextValue|fun(self: Button): TextValue
 function Button:setText(text)
-	self:setProps("text", text)
+	self:setProp("text", text)
 
 	return self
 end
 
 ---@return string
 function Button:getText()
-	return tostring(self:getProps("text"))
+	return tostring(self:getProp("text"))
 end
 
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
-	local bg = self:getProps("bgColor")
-	local fg = self:getProps("fgColor")
-	local x = self:getProps("x")
-	local y = self:getProps("y")
-	local width = self:getProps("width")
-	local height = self:getProps("height")
+	local bg = self:getProp("bgColor")
+	local fg = self:getProp("fgColor")
+	local x = self:getProp("x")
+	local y = self:getProp("y")
+	local width = self:getProp("width")
+	local height = self:getProp("height")
 	local text = self:getText()
 
 	local labelY = y + math.floor((height - 1) / 2)

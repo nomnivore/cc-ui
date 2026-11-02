@@ -25,7 +25,7 @@ local Util = require("ccui.util")
 ---@field children Component[]
 ---@field core Core?
 ---@field handlers table<UIEvent, UIEventFn[]>
----@field props ComponentProps @see getProps
+---@field props ComponentProps @see getProp
 ---@field state table<string, any>
 local Component = {}
 Component.__index = Component
@@ -95,7 +95,7 @@ end
 ---@param id string
 ---@return Component?
 function Component:findById(id)
-	if self:getProps("id") == id then
+	if self:getProp("id") == id then
 		return self
 	end
 
@@ -111,14 +111,14 @@ end
 ---@param name string
 ---@param defaultValue any?
 ---@return any
-function Component:getProps(name, defaultValue)
+function Component:getProp(name, defaultValue)
 	local value = self.props[name]
 	if type(value) == "function" then
 		value = value(self)
 	end
 	if value == nil then
 		if INHERITABLE_PROPS[name] and self.parent then
-			return self.parent:getProps(name, defaultValue)
+			return self.parent:getProp(name, defaultValue)
 		end
 		return defaultValue
 	else
@@ -129,7 +129,7 @@ end
 --- Sets a prop value
 ---@param name string
 ---@param value any
-function Component:setProps(name, value)
+function Component:setProp(name, value)
 	self.props[name] = value
 
 	return self
@@ -139,7 +139,7 @@ end
 ---@return integer width
 ---@return integer height
 function Component:getSize()
-	return self:getProps("width", 0), self:getProps("height", 0)
+	return self:getProp("width", 0), self:getProp("height", 0)
 end
 
 -- Event handling
@@ -241,8 +241,8 @@ end
 --- (x, y)
 ---@return number, number
 function Component:getScreenPos()
-	local x = self:getProps("x")
-	local y = self:getProps("y")
+	local x = self:getProp("x")
+	local y = self:getProp("y")
 
 	if self.parent then
 		local pX, pY = self.parent:getScreenPos()
@@ -261,8 +261,8 @@ function Component:hitTest(x, y)
 	return Util.pointInRect(x, y, {
 		x = posX,
 		y = posY,
-		width = self:getProps("width"),
-		height = self:getProps("height"),
+		width = self:getProp("width"),
+		height = self:getProp("height"),
 	})
 end
 

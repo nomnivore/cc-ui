@@ -8,7 +8,7 @@ local c = UI.Components
 local app = UI.new()
 
 local function centeredHorizontally(self)
-	return math.floor((self.parent:getProps("width") - self:getProps("width")) / 2)
+	return math.floor((self.parent:getProp("width") - self:getProp("width")) / 2)
 end
 
 app.root
@@ -67,7 +67,7 @@ app.root
 			text = "Exit Program",
 			x = centeredHorizontally,
 			y = function()
-				return app.root:getProps("height") - 1
+				return app.root:getProp("height") - 1
 			end,
 		})
 		:onClick(function()
@@ -77,7 +77,7 @@ app.root
 		text = "'k' to increment, 'j' to decrement, 'q' to quit",
 		x = centeredHorizontally,
 		y = function()
-			return app.root:getProps("height")
+			return app.root:getProp("height")
 		end,
 	}))
 

@@ -48,7 +48,7 @@ app.root:add(c.Frame
 	:add(c.Label.new({ x = 2, y = 4, text = "label (no handler)", fgColor = colors.black }))
 	:onClick(function(_, e)
 		counts.bubFrame = counts.bubFrame + 1
-		bubbleTarget = e.target:getProps("type")
+		bubbleTarget = e.target:getProp("type")
 	end))
 
 -- 4. late: gets an onClick only after 'l' is pressed

@@ -5,7 +5,7 @@ local c = UI.Components
 
 local app = UI.new()
 
--- app.root:setProps("bgColor", colors.green)
+-- app.root:setProp("bgColor", colors.green)
 
 app.root:add(c.Label.new({
 	text = function()

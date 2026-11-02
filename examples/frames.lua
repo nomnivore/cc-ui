@@ -14,7 +14,7 @@ end
 local app = UI.new(target)
 
 local value = 0
-app.root:setProps("bgColor", colors.green)
+app.root:setProp("bgColor", colors.green)
 
 app.root:add(c.Frame
 	.new({
@@ -83,7 +83,7 @@ app.root:add(c.Frame
 		:add(c.Label.new({
 			text = "<",
 			x = function(self)
-				return self.parent:getProps("width")
+				return self.parent:getProp("width")
 			end,
 			y = 4,
 		}))
@@ -92,7 +92,7 @@ app.root:add(c.Frame
 			text = "v",
 			x = 2,
 			y = function(self)
-				return self.parent:getProps("height")
+				return self.parent:getProp("height")
 			end,
 		}))))
 

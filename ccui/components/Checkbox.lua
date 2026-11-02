@@ -39,9 +39,9 @@ function Checkbox:toggle(value)
 		if type(self.props.checked) == "function" then
 			return
 		end
-		self:setProps("checked", not self:getProps("checked"))
+		self:setProp("checked", not self:getProp("checked"))
 	else
-		self:setProps("checked", value)
+		self:setProp("checked", value)
 	end
 
 	return self
@@ -50,16 +50,16 @@ end
 --- Gets the checked state
 ---@return boolean
 function Checkbox:isChecked()
-	return self:getProps("checked")
+	return self:getProp("checked")
 end
 
 ---@param term ccTweaked.term.Redirect
 function Checkbox:render(term)
-	local x = self:getProps("x")
-	local y = self:getProps("y")
-	local bgColor = self:getProps("bgColor")
-	local fgColor = self:getProps("fgColor")
-	local checked = self:getProps("checked")
+	local x = self:getProp("x")
+	local y = self:getProp("y")
+	local bgColor = self:getProp("bgColor")
+	local fgColor = self:getProp("fgColor")
+	local checked = self:getProp("checked")
 	term.setCursorPos(x, y)
 	term.blit(checked and "[x]" or "[ ]", string.rep(colors.toBlit(fgColor), 3), string.rep(colors.toBlit(bgColor), 3))
 end
