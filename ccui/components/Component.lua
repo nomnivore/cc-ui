@@ -1,5 +1,15 @@
 local Util = require("ccui.util")
 
+---@alias UIEventFn fun(self: Component, e: UIEventData): boolean?
+---@alias UIEvent "click"|"rightClick"
+
+---@class UIEventData
+---@field name UIEvent
+---@field x integer
+---@field y integer
+---@field target Component
+---@field button integer
+
 ---@class ComponentProps
 ---@field type string|fun(self: Component): string
 ---@field x number|fun(self: Component): number
@@ -14,7 +24,7 @@ local Util = require("ccui.util")
 ---@field parent Component?
 ---@field children Component[]
 ---@field core Core?
----@field eventListeners table<string, table<string, EventFn>>
+---@field handlers table<UIEvent, UIEventFn[]>
 ---@field props ComponentProps @see getProps
 ---@field state table<string, any>
 local Component = {}
@@ -71,7 +81,7 @@ function Component.new(props)
 
 	self.parent = nil
 	self.children = {}
-	self.eventListeners = {}
+	self.handlers = {}
 
 	return self
 end
@@ -129,34 +139,18 @@ end
 
 -- Event handling
 
---- Mounts this component and all children to a core, adding its event listeners
+--- Mounts this component and all children to a core
 ---@param core Core
 function Component:mount(core)
 	self.core = core
-
-	if self.eventListeners then
-		for event, listeners in pairs(self.eventListeners) do
-			for _, listener in ipairs(listeners) do
-				core:addEventListener(event, listener)
-			end
-		end
-	end
 
 	for _, child in ipairs(self.children) do
 		child:mount(core)
 	end
 end
 
---- Unmounts this component and all children from the core, removing its event listeners
+--- Unmounts this component and all children from the core
 function Component:unmount()
-	if self.core and self.eventListeners then
-		for event, listeners in pairs(self.eventListeners) do
-			for _, listener in ipairs(listeners) do
-				self.core:removeEventListener(event, listener)
-			end
-		end
-	end
-
 	for _, child in ipairs(self.children) do
 		child:unmount()
 	end
@@ -165,40 +159,57 @@ function Component:unmount()
 end
 
 --- Adds an event listener to the component
----@param event ccTweaked.os.event
----@param callback EventFn
----@return Component, EventFn
+---@param event UIEvent
+---@param callback UIEventFn
+---@generic T: Component
+---@param self T
+---@return T
 function Component:on(event, callback)
-	if not self.eventListeners[event] then
-		self.eventListeners[event] = {}
+	---@cast self Component
+	if not self.handlers[event] then
+		self.handlers[event] = {}
 	end
 
-	local listener = function(...)
-		callback(self, ...)
-	end
+	table.insert(self.handlers[event], callback)
 
-	table.insert(self.eventListeners[event], listener)
-
-	return self, listener
+	return self
 end
 
 --- Removes an event listener from the component
----@param event ccTweaked.os.event
----@param callback EventFn
+---@param event UIEvent
+---@param callback UIEventFn
 ---@return Component
 function Component:off(event, callback)
-	if not self.eventListeners[event] then
+	if not self.handlers[event] then
 		return self
 	end
 
-	for i, v in ipairs(self.eventListeners[event]) do
+	for i, v in ipairs(self.handlers[event]) do
 		if v == callback then
-			table.remove(self.eventListeners[event], i)
+			table.remove(self.handlers[event], i)
 			break
 		end
 	end
 
 	return self
+end
+
+--- Attempts to fire a UI event on this component
+---@param event UIEvent
+---@param data UIEventData
+---@return boolean handled whether this component handled/consumed the event, stopping propogation
+function Component:emit(event, data)
+	local handled = false
+	-- check if there are any listeners
+	if self.handlers[event] then
+		for _, handler in ipairs(self.handlers[event]) do
+			local result = handler(self, data)
+			if result ~= false then
+				handled = true
+			end
+		end
+	end
+	return handled
 end
 
 -- State management
@@ -260,22 +271,17 @@ function Component:findTarget(x, y)
 	end
 end
 
---- Adds an event listener for mouse clicks on the component
----@param callback fun(self: Component)
+--- Alias for :on("click", ...)
+---@param callback UIEventFn
 ---@return Component
 function Component:onClick(callback)
-	self:on("mouse_click", function(_, mb, x, y)
-		if mb == 1 and self:hitTest(x, y) then
-			callback(self)
-		end
-	end)
-
-	return self
+	return self:on("click", callback)
 end
 
 --- Render the component to the display
 --- Empty by default
 ---@param term ccTweaked.term.Redirect
+---@diagnostic disable-next-line: unused-local
 function Component:render(term) end
 
 return Component

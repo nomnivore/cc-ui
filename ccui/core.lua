@@ -1,6 +1,6 @@
 local Frame = require("ccui.components.Frame")
 
----@alias EventFn fun(self: Component, ...)
+---@alias EventFn fun(...)
 
 ---@class Core
 ---@field root Frame
@@ -88,6 +88,66 @@ function Core:removeEventListener(event, callback)
 	return self
 end
 
+-- Private functions for the :start loop
+
+--- Broadcasts an OS event to all app eventListeners
+---@param eventData table
+---@private
+function Core:broadcast(eventData)
+	local event = eventData[1]
+	if self.events[event] then
+		for _, callback in ipairs(self.events[event]) do
+			callback(table.unpack(eventData, 2, eventData.n))
+		end
+	end
+end
+
+--- Translates an OS event to a UI event tag
+---@param eventData table
+---@return UIEventData|nil e WITHOUT a 'target' set (maybe needs type annotation fixing?)
+---@private
+function Core:translate(eventData)
+	local event = eventData[1]
+	if event == "mouse_click" then
+		local button = eventData[2]
+		if button == 1 then
+			return {
+				name = "click",
+				button = button,
+				x = eventData[3],
+				y = eventData[4],
+			}
+		elseif button == 2 then
+			return {
+				name = "rightClick",
+				button = button,
+				x = eventData[3],
+				y = eventData[4],
+			}
+		end
+	end
+end
+
+---@param e UIEventData
+---@private
+function Core:dispatch(e)
+	local target = self.root:findTarget(e.x, e.y)
+	if not target then
+		return
+	end
+
+	e.target = target
+
+	local bubbling = target
+	while bubbling ~= nil do
+		local stop = bubbling:emit(e.name, e)
+		if stop then
+			break
+		end
+		bubbling = bubbling.parent
+	end
+end
+
 ---Mounts the root component and starts the main event loop
 ---@return Core
 function Core:start()
@@ -104,11 +164,10 @@ function Core:start()
 			-- if we want apps to be able to intercept it.
 			-- NOT implemented yet. ctrl+T uses normal behaviour.
 			local eventData = table.pack(os.pullEvent())
-			local event = eventData[1]
-			if self.events[event] then
-				for _, callback in ipairs(self.events[event]) do
-					callback(table.unpack(eventData, 2, eventData.n))
-				end
+			self:broadcast(eventData)
+			local uiEvent = self:translate(eventData)
+			if uiEvent then
+				self:dispatch(uiEvent)
 			end
 		end
 	end)
