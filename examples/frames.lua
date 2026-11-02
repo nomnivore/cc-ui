@@ -3,7 +3,15 @@ require("_path")
 local UI = require("ccui")
 local c = UI.Components
 
-local app = UI.new()
+-- render to a monitor on top if one is attached, otherwise the computer's own screen
+local target = nil
+if peripheral.getType("top") == "monitor" then
+	local monitor = peripheral.wrap("top") --[[@as ccTweaked.peripherals.Monitor]]
+	monitor.setTextScale(0.5)
+	target = monitor
+end
+
+local app = UI.new(target)
 
 local value = 0
 app.root:setProps("bgColor", colors.green)
@@ -22,17 +30,16 @@ app.root:add(c.Frame
 			return "x: " .. x .. ", y: " .. y
 		end,
 	}))
-	:add(c.Button
-		.new({
-			x = 2,
-			y = 4,
-			text = function()
-				return "click: " .. tostring(value)
-			end,
-		})
-		:onClick(function(self)
+	:add(c.Button.new({
+		x = 2,
+		y = 4,
+		text = function()
+			return "click: " .. tostring(value)
+		end,
+		onClick = function(self)
 			value = value + 1
-		end))
+		end,
+	}))
 	:add(c.Label.new({
 		y = 6,
 		text = "this is a really long bit of text that should be longer than 20 characters and thus get cut off",
@@ -89,17 +96,6 @@ app.root:add(c.Frame
 			end,
 		}))))
 
-local lastHit = ""
-app.root:add(c.Label.new({
-	text = function()
-		return lastHit
-	end,
-}))
-
-app:addEventListener("mouse_click", function(_, x, y)
-	local t = app.root:findTarget(x, y)
-	lastHit = (t and t:getProps("type") or "none") .. " : " .. (t and t:getProps("id") or "none")
-end)
 
 app:addEventListener("char", function(key)
 	if key == "q" then
