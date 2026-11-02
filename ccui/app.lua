@@ -12,15 +12,16 @@ local Frame = require("ccui.components.Frame")
 local App = {}
 App.__index = App
 
--- used to hang onto the global term object
-local ccterm = term
+---@class AppOptions
+---@field term ccTweaked.term.Redirect?
 
 ---@return App
----@param term ccTweaked.term.Redirect?
-function App.new(term)
+---@param opts AppOptions?
+function App.new(opts)
 	local self = setmetatable({}, App)
+	opts = opts or {}
 
-	self.term = term or ccterm.current()
+	self.term = opts.term or term.current()
 
 	-- check if monitor
 	local ok, name = pcall(peripheral.getName, self.term)
@@ -134,7 +135,7 @@ function App:translate(eventData)
 		name = name,
 		button = button,
 		x = eventData[3],
-		y = eventData[4]
+		y = eventData[4],
 	}
 end
 
