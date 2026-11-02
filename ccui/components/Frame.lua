@@ -65,8 +65,8 @@ function Frame:add(child)
 	child.parent = self
 	table.insert(self.children, child)
 
-	if self.core then
-		child:mount(self.core)
+	if self.app then
+		child:mount(self.app)
 	end
 
 	return self

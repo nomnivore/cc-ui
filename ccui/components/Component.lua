@@ -23,7 +23,7 @@ local Util = require("ccui.util")
 ---@class Component
 ---@field parent Component?
 ---@field children Component[]
----@field core Core?
+---@field app App?
 ---@field handlers table<UIEvent, UIEventFn[]>
 ---@field props ComponentProps @see getProp
 ---@field state table<string, any>
@@ -144,23 +144,23 @@ end
 
 -- Event handling
 
---- Mounts this component and all children to a core
----@param core Core
-function Component:mount(core)
-	self.core = core
+--- Mounts this component and all children to an app
+---@param app App
+function Component:mount(app)
+	self.app = app
 
 	for _, child in ipairs(self.children) do
-		child:mount(core)
+		child:mount(app)
 	end
 end
 
---- Unmounts this component and all children from the core
+--- Unmounts this component and all children from the app
 function Component:unmount()
 	for _, child in ipairs(self.children) do
 		child:unmount()
 	end
 
-	self.core = nil
+	self.app = nil
 end
 
 --- Adds an event listener to the component
