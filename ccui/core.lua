@@ -6,6 +6,7 @@ local Frame = require("ccui.components.Frame")
 ---@field root Frame
 ---@field term ccTweaked.term.Redirect
 ---@field running boolean
+---@field monitorName string?
 ---@field private events table<ccTweaked.os.event, EventFn[]>
 ---@field private buffer ccTweaked.Window
 local Core = {}
@@ -20,6 +21,11 @@ function Core.new(term)
 	local self = setmetatable({}, Core)
 
 	self.term = term or ccterm.current()
+
+	-- check if monitor
+	local ok, name = pcall(peripheral.getName, self.term)
+	self.monitorName = ok and name or nil
+
 	self.root = Frame.new({
 		term = self.term,
 		-- inherited properties found in ./components/Component.lua
@@ -102,30 +108,34 @@ function Core:broadcast(eventData)
 	end
 end
 
---- Translates an OS event to a UI event tag
+local MOUSE_BUTTONS = { [1] = "click", [2] = "rightClick" }
+
+--- Translates an OS event to UI event data
 ---@param eventData table
----@return UIEventData|nil e WITHOUT a 'target' set (maybe needs type annotation fixing?)
+---@return UIEventData|nil e WITHOUT a 'target' set
 ---@private
 function Core:translate(eventData)
 	local event = eventData[1]
-	if event == "mouse_click" then
-		local button = eventData[2]
-		if button == 1 then
-			return {
-				name = "click",
-				button = button,
-				x = eventData[3],
-				y = eventData[4],
-			}
-		elseif button == 2 then
-			return {
-				name = "rightClick",
-				button = button,
-				x = eventData[3],
-				y = eventData[4],
-			}
-		end
+	local name, button
+
+	if event == "mouse_click" and not self.monitorName then
+		button = eventData[2]
+		name = MOUSE_BUTTONS[button]
+	elseif event == "monitor_touch" and eventData[2] == self.monitorName then
+		button = 1
+		name = MOUSE_BUTTONS[button]
 	end
+
+	if not name then
+		return nil
+	end
+
+	return {
+		name = name,
+		button = button,
+		x = eventData[3],
+		y = eventData[4]
+	}
 end
 
 ---@param e UIEventData
