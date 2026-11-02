@@ -25,11 +25,11 @@
   },
   {
     "type": "file",
-    "url": "init.lua"
+    "url": "app.lua"
   },
   {
     "type": "file",
-    "url": "core.lua"
+    "url": "init.lua"
   },
   {
     "type": "file",
