@@ -50,7 +50,8 @@ app.root:add(c.Frame
 		height = 10,
 		bgColor = colors.gray,
 	})
-	:add(c.Frame
+	:add(c
+		.Frame
 		.new({
 			x = 4,
 			y = 3,
@@ -87,6 +88,18 @@ app.root:add(c.Frame
 				return self.parent:getProps("height")
 			end,
 		}))))
+
+local lastHit = ""
+app.root:add(c.Label.new({
+	text = function()
+		return lastHit
+	end,
+}))
+
+app:addEventListener("mouse_click", function(_, x, y)
+	local t = app.root:findTarget(x, y)
+	lastHit = (t and t:getProps("type") or "none") .. " : " .. (t and t:getProps("id") or "none")
+end)
 
 app:addEventListener("char", function(key)
 	if key == "q" then

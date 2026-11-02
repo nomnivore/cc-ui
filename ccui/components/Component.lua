@@ -250,6 +250,16 @@ function Component:hitTest(x, y)
 	})
 end
 
+--- Finds the target component at the given coordinates
+---@param x integer
+---@param y integer
+---@return Component?
+function Component:findTarget(x, y)
+	if self:hitTest(x, y) then
+		return self
+	end
+end
+
 --- Adds an event listener for mouse clicks on the component
 ---@param callback fun(self: Component)
 ---@return Component

@@ -72,6 +72,28 @@ function Frame:add(child)
 	return self
 end
 
+--- Finds the target component at the given coordinates
+---@param x integer
+---@param y integer
+---@return Component?
+function Frame:findTarget(x, y)
+	if not self:hitTest(x, y) then
+		-- outside bounds
+		return
+	end
+
+	-- recursively check if the coord belongs to a child component
+	-- searching last-to-first
+	for i = #self.children, 1, -1 do
+		local hit = self.children[i]:findTarget(x, y)
+		if hit then
+			return hit
+		end
+	end
+
+	return self
+end
+
 ---@param term ccTweaked.term.Redirect
 function Frame:render(term)
 	local x = self:getProps("x")
