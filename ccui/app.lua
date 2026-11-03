@@ -51,7 +51,7 @@ function App.new(opts)
 	return self
 end
 
---- Adds a component to the root
+---Adds a component to the root
 ---@param child Component
 ---@return App self
 function App:add(child)
@@ -115,7 +115,7 @@ end
 
 -- Private functions for the :start loop
 
---- Broadcasts an OS event to all app eventListeners
+---Broadcasts an OS event to all app eventListeners
 ---@param eventData table
 ---@private
 function App:broadcast(eventData)
@@ -129,7 +129,7 @@ end
 
 local MOUSE_BUTTONS = { [1] = "click", [2] = "rightClick" }
 
---- Translates an OS event to UI event data
+---Translates an OS event to UI event data
 ---@param eventData table
 ---@return UIEventData|nil e WITHOUT a 'target' set
 ---@private
@@ -177,31 +177,62 @@ function App:dispatch(e)
 	end
 end
 
----Mounts the root component and starts the main event loop
----@return App
-function App:start()
+-- App lifecycle pieces: managed in App:start
+-- Accessible to end-users that want to control the event loop themselves.
+
+---Mounts the root component to the screen and performs a first-render.
+---For advanced control flow.
+---@see App.start for normal control.
+function App:open()
 	-- normalize the terminal colors and content
 	self:clearScreen()
 
 	self.root:mount(self)
 
 	self.running = true
+
+	self:renderUI()
+end
+
+---Updates the app with an event (from os.pullEvent) and re-render.
+---For advanced control flow.
+---@see App.start for normal control.
+function App:update(...)
+	local eventData = table.pack(...)
+	self:broadcast(eventData)
+	local uiEvent = self:translate(eventData)
+	if uiEvent then
+		self:dispatch(uiEvent)
+	end
+
+	self:renderUI()
+end
+
+---Unmounts the root component and gracefully shuts down the application.
+---For advanced control flow.
+---@see App.start for normal control.
+---@see App.stop for normal control.
+function App:close()
+	self.running = false -- may be redundant but just to be sure
+	self:clearScreen()
+	self.root:unmount()
+end
+
+---Mounts the app along with a controlled main event loop and error handling.
+---@return App
+function App:start()
+	self:open()
+
 	local ok, err = pcall(function()
 		while self.running do
-			self:renderUI()
 			-- pullEventRaw catches "terminate" event for ctrl+T
 			-- if we want apps to be able to intercept it.
 			-- NOT implemented yet. ctrl+T uses normal behaviour.
-			local eventData = table.pack(os.pullEvent())
-			self:broadcast(eventData)
-			local uiEvent = self:translate(eventData)
-			if uiEvent then
-				self:dispatch(uiEvent)
-			end
+			self:update(os.pullEvent())
 		end
 	end)
-	self.running = false
-	self:clearScreen()
+
+	self:close()
 	-- rethrow errors after cleanup
 	if not ok then
 		error(err, 0)
@@ -210,7 +241,7 @@ function App:start()
 	return self
 end
 
----Stops the main event loop and unmounts the root component
+---Stops the main event loop and unmounts the application
 ---@return App
 function App:stop()
 	self.running = false
