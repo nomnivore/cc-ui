@@ -42,8 +42,6 @@ function Frame.new(props)
 
 	self.props.type = "frame"
 
-	self.props.x = props.x or 1
-	self.props.y = props.y or 1
 	self.props.width = props.width
 		or function(s)
 			---@cast s Frame
