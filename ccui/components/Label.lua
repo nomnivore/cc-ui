@@ -1,13 +1,13 @@
 local Component = require("ccui.components.Component")
+local util = require("ccui.util")
 
 ---@class LabelProps : ComponentProps
 ---@field text TextValue|fun(self: Label): TextValue
 
 ---@class Label : Component
+---@overload fun(props?: NewLabelProps): Label
 ---@field props LabelProps
-local Label = {}
-setmetatable(Label, Component)
-Label.__index = Label
+local Label = util.class(Component)
 
 ---@class NewLabelProps : NewComponentProps
 ---@field text TextValue|nil|fun(self: Label): TextValue
@@ -16,7 +16,7 @@ Label.__index = Label
 function Label.new(props)
 	props = props or {}
 	local self = Component.new(props)
-	setmetatable(self, Label)
+	setmetatable(self, Label --[[@as table]])
 	---@cast self Label
 
 	self.props.type = "label"

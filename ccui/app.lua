@@ -1,16 +1,17 @@
 local Frame = require("ccui.components.Frame")
+local util = require("ccui.util")
 
 ---@alias EventFn fun(...)
 
 ---@class App
+---@overload fun(opts: AppOptions?): App
 ---@field root Frame
 ---@field term ccTweaked.term.Redirect
 ---@field running boolean
 ---@field monitorName string?
 ---@field private events table<ccTweaked.os.event, EventFn[]>
 ---@field private buffer ccTweaked.Window
-local App = {}
-App.__index = App
+local App = util.class()
 
 ---@class AppOptions
 ---@field term ccTweaked.term.Redirect?
@@ -18,7 +19,7 @@ App.__index = App
 ---@return App
 ---@param opts AppOptions?
 function App.new(opts)
-	local self = setmetatable({}, App)
+	local self = setmetatable({}, App --[[@as table]])
 	opts = opts or {}
 
 	self.term = opts.term or term.current()

@@ -1,13 +1,13 @@
 local Component = require("ccui.components.Component")
+local util = require("ccui.util")
 
 ---@class FrameProps : ComponentProps
 ---@field term ccTweaked.term.Redirect
 
 ---@class Frame : Component
+---@overload fun(props?: NewFrameProps): Frame
 ---@field props FrameProps
-local Frame = {}
-setmetatable(Frame, Component)
-Frame.__index = Frame
+local Frame = util.class(Component)
 
 ---@class NewFrameProps : NewComponentProps
 ---@field term ccTweaked.term.Redirect?
@@ -36,7 +36,7 @@ end
 function Frame.new(props)
 	props = props or {}
 	local self = Component.new(props)
-	setmetatable(self, Frame)
+	setmetatable(self, Frame --[[@as table]])
 	---@cast self Frame
 
 	self.props.type = "frame"

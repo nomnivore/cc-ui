@@ -1,13 +1,13 @@
 local Component = require("ccui.components.Component")
+local util = require("ccui.util")
 
 ---@class ButtonProps : ComponentProps
 ---@field text TextValue|fun(self: Button): TextValue
 
 ---@class Button : Component
+---@overload fun(props?: NewButtonProps): Button
 ---@field props ButtonProps
-local Button = {}
-setmetatable(Button, Component)
-Button.__index = Button
+local Button = util.class(Component)
 
 ---@class NewButtonProps : NewComponentProps
 ---@field text TextValue|nil|fun(self: Button): TextValue
@@ -16,7 +16,7 @@ Button.__index = Button
 function Button.new(props)
 	props = props or {}
 	local self = Component.new(props)
-	setmetatable(self, Button)
+	setmetatable(self, Button --[[@as table]])
 	---@cast self Button
 
 	self.props.type = "button"

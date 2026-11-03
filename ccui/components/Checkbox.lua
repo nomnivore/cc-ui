@@ -1,13 +1,13 @@
 local Component = require("ccui.components.Component")
+local util = require("ccui.util")
 
 ---@class CheckboxProps : ComponentProps
 ---@field checked boolean|nil|fun(self: Checkbox): boolean
 
 ---@class Checkbox : Component
+---@overload fun(props: NewCheckboxProps?): Checkbox
 ---@field props CheckboxProps
-local Checkbox = {}
-setmetatable(Checkbox, Component)
-Checkbox.__index = Checkbox
+local Checkbox = util.class(Component)
 
 ---@class NewCheckboxProps : NewComponentProps
 ---@field checked boolean|nil|fun(self: Checkbox): boolean
@@ -16,7 +16,7 @@ Checkbox.__index = Checkbox
 function Checkbox.new(props)
 	props = props or {}
 	local self = Component.new(props)
-	setmetatable(self, Checkbox)
+	setmetatable(self, Checkbox --[[@as table]])
 	---@cast self Checkbox
 
 	self.props.type = "checkbox"

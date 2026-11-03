@@ -1,4 +1,4 @@
-local Util = require("ccui.util")
+local util = require("ccui.util")
 
 ---@alias UIEventFn fun(self: Component, e: UIEventData): boolean?
 ---@alias UIEvent "click"|"rightClick"
@@ -21,14 +21,14 @@ local Util = require("ccui.util")
 ---@field id string
 
 ---@class Component
+---@overload fun(props?: NewComponentProps): Component
 ---@field parent Component?
 ---@field children Component[]
 ---@field app App?
 ---@field handlers table<UIEvent, UIEventFn[]>
 ---@field props ComponentProps @see getProp
 ---@field state table<string, any>
-local Component = {}
-Component.__index = Component
+local Component = util.class()
 
 ---@class NewComponentProps
 ---@field type string|nil|fun(self: Component): string
@@ -52,7 +52,8 @@ local INHERITABLE_PROPS = {
 ---@param props NewComponentProps?
 function Component.new(props)
 	props = props or {}
-	local self = setmetatable({}, Component)
+	-- cast: @overload makes LuaLS see the class as callable, not a table
+	local self = setmetatable({}, Component --[[@as table]])
 
 	-- props with default values
 	---@diagnostic disable-next-line: missing-fields
@@ -85,7 +86,7 @@ function Component.new(props)
 	end
 
 	if props.id == nil then
-		self.props.id = tostring(Util.generateUniqueId())
+		self.props.id = tostring(util.generateUniqueId())
 	end
 
 	return self
@@ -258,7 +259,7 @@ end
 ---@return boolean
 function Component:hitTest(x, y)
 	local posX, posY = self:getScreenPos()
-	return Util.pointInRect(x, y, {
+	return util.pointInRect(x, y, {
 		x = posX,
 		y = posY,
 		width = self:getProp("width"),

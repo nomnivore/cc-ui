@@ -3,21 +3,20 @@ require("_path")
 -- Simple counter example app using ccui
 
 local UI = require("ccui")
-local c = UI.Components
 
-local app = UI.App.new()
+local app = UI.App()
 
 local function centeredHorizontally(self)
 	return math.floor((self.parent:getProp("width") - self:getProp("width")) / 2)
 end
 
 app.root
-	:add(c.Label.new({
+	:add(UI.Label({
 		text = "Counter",
 		x = centeredHorizontally,
 		y = 1,
 	}))
-	:add(c.Label.new({
+	:add(UI.Label({
 		text = function(self)
 			return self:getState("count")
 		end,
@@ -28,52 +27,46 @@ app.root
 			count = 0,
 		},
 	}))
-	:add(c.Button
-		.new({
-			text = "Increment",
-			x = function(self)
-				return centeredHorizontally(self) - 6
-			end,
-			y = 3,
-			bgColor = colors.green,
-			fgColor = colors.white,
-		})
-		:onClick(function()
-			local el = app.root:findById("count")
-			if not el then
-				return
-			end
-			el:setState("count", el:getState("count") + 1)
-		end))
-	:add(c.Button
-		.new({
-			text = "Decrement",
-			x = function(self)
-				return centeredHorizontally(self) + 6
-			end,
-			y = 3,
-			bgColor = colors.red,
-			fgColor = colors.white,
-		})
-		:onClick(function()
-			local el = app.root:findById("count")
-			if not el then
-				return
-			end
-			el:setState("count", el:getState("count") - 1)
-		end))
-	:add(c.Button
-		.new({
-			text = "Exit Program",
-			x = centeredHorizontally,
-			y = function()
-				return app.root:getProp("height") - 1
-			end,
-		})
-		:onClick(function()
-			app:stop()
-		end))
-	:add(c.Label.new({
+	:add(UI.Button({
+		text = "Increment",
+		x = function(self)
+			return centeredHorizontally(self) - 6
+		end,
+		y = 3,
+		bgColor = colors.green,
+		fgColor = colors.white,
+	}):onClick(function()
+		local el = app.root:findById("count")
+		if not el then
+			return
+		end
+		el:setState("count", el:getState("count") + 1)
+	end))
+	:add(UI.Button({
+		text = "Decrement",
+		x = function(self)
+			return centeredHorizontally(self) + 6
+		end,
+		y = 3,
+		bgColor = colors.red,
+		fgColor = colors.white,
+	}):onClick(function()
+		local el = app.root:findById("count")
+		if not el then
+			return
+		end
+		el:setState("count", el:getState("count") - 1)
+	end))
+	:add(UI.Button({
+		text = "Exit Program",
+		x = centeredHorizontally,
+		y = function()
+			return app.root:getProp("height") - 1
+		end,
+	}):onClick(function()
+		app:stop()
+	end))
+	:add(UI.Label({
 		text = "'k' to increment, 'j' to decrement, 'q' to quit",
 		x = centeredHorizontally,
 		y = function()
