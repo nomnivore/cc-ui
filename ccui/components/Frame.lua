@@ -34,6 +34,7 @@ end
 --- Also acts as a root component for an app.
 --- Size defaults to the remaining space in the parent window/terminal if no width/height are given
 ---@param props NewFrameProps?
+---@return Frame
 function Frame.new(props)
 	props = props or {}
 	local self = Component.new(props, true)
@@ -67,7 +68,11 @@ end
 
 --- Adds a child component to this component, mounting it if this component is mounted
 ---@param child Component
+---@generic T: Frame
+---@param self T
+---@return T
 function Frame:add(child)
+	---@cast self Frame
 	child.parent = self
 	table.insert(self.children, child)
 

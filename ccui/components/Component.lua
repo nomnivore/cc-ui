@@ -51,6 +51,7 @@ local INHERITABLE_PROPS = {
 --- Creates a new component
 ---@param props NewComponentProps?
 ---@param isContainer boolean?
+---@return Component
 function Component.new(props, isContainer)
 	props = props or {}
 	-- cast: @overload makes LuaLS see the class as callable, not a table
@@ -148,7 +149,11 @@ end
 --- Sets a prop value
 ---@param name string
 ---@param value any
+---@generic T: Component
+---@param self T
+---@return T
 function Component:setProp(name, value)
+	---@cast self Component
 	self.props[name] = value
 
 	return self
@@ -202,8 +207,11 @@ end
 --- Removes an event listener from the component
 ---@param event UIEvent
 ---@param callback UIEventFn
----@return Component
+---@generic T: Component
+---@param self T
+---@return T
 function Component:off(event, callback)
+	---@cast self Component
 	if not self.handlers[event] then
 		return self
 	end
@@ -297,8 +305,11 @@ end
 
 --- Alias for :on("click", ...)
 ---@param callback UIEventFn
----@return Component
+---@generic T: Component
+---@param self T
+---@return T
 function Component:onClick(callback)
+	---@cast self Component
 	return self:on("click", callback)
 end
 
