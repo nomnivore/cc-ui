@@ -15,6 +15,7 @@ local App = util.class()
 
 ---@class AppOptions
 ---@field term ccTweaked.term.Redirect?
+---@field [integer] Component|false
 
 ---@return App
 ---@param opts AppOptions?
@@ -39,6 +40,22 @@ function App.new(opts)
 	self.events = {}
 	local w, h = self.term.getSize()
 	self.buffer = window.create(self.term, 1, 1, w, h, false)
+
+	-- add children from positional arguments
+	for _, v in ipairs(opts) do
+		if type(v) == "table" and v.mount then
+			self:add(v)
+		end
+	end
+
+	return self
+end
+
+--- Adds a component to the root
+---@param child Component
+---@return App self
+function App:add(child)
+	self.root:add(child)
 
 	return self
 end

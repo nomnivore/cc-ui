@@ -69,13 +69,17 @@ function Component.new(props)
 	self.handlers = {}
 
 	-- props defined in table arg
-	-- 'state' is handled differently.
 	for k, v in pairs(props) do
-		if string.match(k, "^on%u") and type(v) == "function" then
-			local eventKey = string.sub(k, 3, 3):lower() .. string.sub(k, 4)
-			self:on(eventKey, v)
-		elseif k ~= "state" then
-			self.props[k] = v
+		-- skip any keys that aren't strings
+		if type(k) == "string" then
+			-- UIEvent handlers: onX
+			if string.match(k, "^on%u") and type(v) == "function" then
+				local eventKey = string.sub(k, 3, 3):lower() .. string.sub(k, 4)
+				self:on(eventKey, v)
+			-- state goes to a different destination
+			elseif k ~= "state" then
+				self.props[k] = v
+			end
 		end
 	end
 

@@ -2,21 +2,19 @@ require("_path")
 
 -- Simple counter example app using ccui
 
-local UI = require("ccui")
-
-local app = UI.App()
+local ui = require("ccui")
 
 local function centeredHorizontally(self)
 	return math.floor((self.parent:getProp("width") - self:getProp("width")) / 2)
 end
 
-app.root
-	:add(UI.Label({
+local app = ui.App({
+	ui.Label({
 		text = "Counter",
 		x = centeredHorizontally,
 		y = 1,
-	}))
-	:add(UI.Label({
+	}),
+	ui.Label({
 		text = function(self)
 			return self:getState("count")
 		end,
@@ -26,8 +24,8 @@ app.root
 		state = {
 			count = 0,
 		},
-	}))
-	:add(UI.Button({
+	}),
+	ui.Button({
 		text = "Increment",
 		x = function(self)
 			return centeredHorizontally(self) - 6
@@ -35,14 +33,14 @@ app.root
 		y = 3,
 		bgColor = colors.green,
 		fgColor = colors.white,
-	}):onClick(function()
-		local el = app.root:findById("count")
+	}):onClick(function(self)
+		local el = self.app.root:findById("count")
 		if not el then
 			return
 		end
 		el:setState("count", el:getState("count") + 1)
-	end))
-	:add(UI.Button({
+	end),
+	ui.Button({
 		text = "Decrement",
 		x = function(self)
 			return centeredHorizontally(self) + 6
@@ -50,29 +48,30 @@ app.root
 		y = 3,
 		bgColor = colors.red,
 		fgColor = colors.white,
-	}):onClick(function()
-		local el = app.root:findById("count")
+	}):onClick(function(self)
+		local el = self.app.root:findById("count")
 		if not el then
 			return
 		end
 		el:setState("count", el:getState("count") - 1)
-	end))
-	:add(UI.Button({
+	end),
+	ui.Button({
 		text = "Exit Program",
 		x = centeredHorizontally,
-		y = function()
-			return app.root:getProp("height") - 1
+		y = function(self)
+			return self.app.root:getProp("height") - 1
 		end,
-	}):onClick(function()
-		app:stop()
-	end))
-	:add(UI.Label({
+	}):onClick(function(self)
+		self.app:stop()
+	end),
+	ui.Label({
 		text = "'k' to increment, 'j' to decrement, 'q' to quit",
 		x = centeredHorizontally,
-		y = function()
-			return app.root:getProp("height")
+		y = function(self)
+			return self.app.root:getProp("height")
 		end,
-	}))
+	}),
+})
 
 app:addEventListener("char", function(key)
 	if key == "q" then

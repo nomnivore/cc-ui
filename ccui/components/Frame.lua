@@ -11,6 +11,7 @@ local Frame = util.class(Component)
 
 ---@class NewFrameProps : NewComponentProps
 ---@field term ccTweaked.term.Redirect?
+---@field [integer] Component|false
 
 ---@param frame Frame
 local function defaultSize(frame)
@@ -55,6 +56,13 @@ function Frame.new(props)
 			local _, h = defaultSize(s)
 			return h - s:getProp("y") + 1
 		end
+
+	-- add children from positional arguments
+	for _, v in ipairs(props) do
+		if type(v) == "table" and v.mount then
+			self:add(v)
+		end
+	end
 
 	return self
 end
