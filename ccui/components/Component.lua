@@ -50,7 +50,8 @@ local INHERITABLE_PROPS = {
 
 --- Creates a new component
 ---@param props NewComponentProps?
-function Component.new(props)
+---@param isContainer boolean?
+function Component.new(props, isContainer)
 	props = props or {}
 	-- cast: @overload makes LuaLS see the class as callable, not a table
 	local self = setmetatable({}, Component --[[@as table]])
@@ -91,6 +92,19 @@ function Component.new(props)
 
 	if props.id == nil then
 		self.props.id = tostring(util.generateUniqueId())
+	end
+
+	if not isContainer then
+		-- throw an error if any positional arguments are passed in as components
+		for _, v in ipairs(props) do
+			if type(v) == "table" and v.mount then
+				local name = (v.props and v.props.type or "unknown")
+				error(
+					"cannot add a '" .. name .. "' as a child: only container components accept children",
+					3 -- should land in user code most of the time
+				)
+			end
+		end
 	end
 
 	return self

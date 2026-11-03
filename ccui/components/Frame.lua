@@ -36,7 +36,7 @@ end
 ---@param props NewFrameProps?
 function Frame.new(props)
 	props = props or {}
-	local self = Component.new(props)
+	local self = Component.new(props, true)
 	setmetatable(self, Frame --[[@as table]])
 	---@cast self Frame
 
