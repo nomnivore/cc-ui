@@ -83,7 +83,7 @@ end)
 
 -- ticker: a cancellable every
 local function startTicker()
-	_, stopTicker = app:every(0.2, function()
+	stopTicker = app:every(0.2, function()
 		ticks = ticks + 1
 	end)
 end

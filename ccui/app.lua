@@ -128,20 +128,20 @@ end
 
 ---Runs `fn` as a background task, which may sleep or pullEvent without blocking the app.
 ---@param fn function
----@return App self, function cancel
+---@return function cancel
 function App:spawn(fn)
 	---@type TaskRecord
 	local record = { co = coroutine.create(fn) }
 	table.insert(self.pendingTasks, record)
 
-	return self, function()
+	return function()
 		record.cancelled = true
 	end
 end
 
 ---Runs `fn` after `s` seconds.
 ---@param fn function
----@return App self, function cancel
+---@return function cancel
 function App:after(s, fn)
 	return self:spawn(function()
 		sleep(s)
@@ -151,7 +151,7 @@ end
 
 ---Runs `fn` once, then again every `s` seconds indefinitely until cancelled.
 ---@param fn function
----@return App self, function cancel
+---@return function cancel
 function App:every(s, fn)
 	return self:spawn(function()
 		fn()
