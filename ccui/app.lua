@@ -297,6 +297,12 @@ end
 function App:update(...)
 	local eventData = table.pack(...)
 
+	-- guard: if the user passed in an pre-packed table, just use that
+	-- first element should always be a string, so we can check for table
+	if type(eventData[1]) == "table" then
+		eventData = eventData[1]
+	end
+
 	-- resume ongoing tasks
 	self.tasks = self:resumeTasks(eventData)
 
