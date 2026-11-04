@@ -15,8 +15,7 @@ local Button = util.class(Component)
 ---@param props NewButtonProps?
 function Button.new(props)
 	props = props or {}
-	local self = Component.new(props)
-	setmetatable(self, Button --[[@as table]])
+	local self = Component.new(props, Button)
 	---@cast self Button
 
 	self.props.type = "button"

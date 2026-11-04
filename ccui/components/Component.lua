@@ -22,6 +22,7 @@ local util = require("ccui.util")
 
 ---@class Component
 ---@overload fun(props?: NewComponentProps): Component
+---@field isContainer boolean?
 ---@field parent Component?
 ---@field children Component[]
 ---@field app App?
@@ -50,12 +51,13 @@ local INHERITABLE_PROPS = {
 
 --- Creates a new component
 ---@param props NewComponentProps?
----@param isContainer boolean?
+---@param cls any? class to instantiate, default Component
 ---@return Component
-function Component.new(props, isContainer)
+function Component.new(props, cls)
 	props = props or {}
+	cls = cls or Component
 	-- cast: @overload makes LuaLS see the class as callable, not a table
-	local self = setmetatable({}, Component --[[@as table]])
+	local self = setmetatable({}, cls --[[@as table]])
 
 	-- props with default values
 	---@diagnostic disable-next-line: missing-fields
@@ -95,7 +97,7 @@ function Component.new(props, isContainer)
 		self.props.id = tostring(util.generateUniqueId())
 	end
 
-	if not isContainer then
+	if not cls.isContainer then
 		-- throw an error if any positional arguments are passed in as components
 		for _, v in ipairs(props) do
 			if type(v) == "table" and v.mount then

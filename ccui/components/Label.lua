@@ -15,8 +15,7 @@ local Label = util.class(Component)
 ---@param props NewLabelProps?
 function Label.new(props)
 	props = props or {}
-	local self = Component.new(props)
-	setmetatable(self, Label --[[@as table]])
+	local self = Component.new(props, Label)
 	---@cast self Label
 
 	self.props.type = "label"
