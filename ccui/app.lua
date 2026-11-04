@@ -11,11 +11,18 @@ local util = require("ccui.util")
 ---@field monitorName string?
 ---@field private events table<ccTweaked.os.event, EventFn[]>
 ---@field private buffer ccTweaked.Window
+---@field private tasks TaskRecord[]
+---@field private pendingTasks TaskRecord[]
 local App = util.class()
 
 ---@class AppOptions
 ---@field term ccTweaked.term.Redirect?
 ---@field [integer] Component|false
+
+---@class TaskRecord
+---@field co thread
+---@field filter string|nil
+---@field cancelled boolean|nil
 
 ---@return App
 ---@param opts AppOptions?
@@ -38,6 +45,10 @@ function App.new(opts)
 	})
 	self.running = false
 	self.events = {}
+
+	self.tasks = {}
+	self.pendingTasks = {}
+
 	local w, h = self.term.getSize()
 	self.buffer = window.create(self.term, 1, 1, w, h, false)
 
@@ -111,6 +122,90 @@ function App:removeEventListener(event, callback)
 	end
 
 	return self
+end
+
+-- Concurrency / Scheduler methods
+
+---Runs `fn` as a background task, which may sleep or pullEvent without blocking the app.
+---@param fn function
+---@return App self, function cancel
+function App:spawn(fn)
+	---@type TaskRecord
+	local record = { co = coroutine.create(fn) }
+	table.insert(self.pendingTasks, record)
+
+	return self, function()
+		record.cancelled = true
+	end
+end
+
+---Runs `fn` after `s` seconds.
+---@param fn function
+---@return App self, function cancel
+function App:after(s, fn)
+	return self:spawn(function()
+		sleep(s)
+		fn()
+	end)
+end
+
+---Runs `fn` once, then again every `s` seconds indefinitely until cancelled.
+---@param fn function
+---@return App self, function cancel
+function App:every(s, fn)
+	return self:spawn(function()
+		fn()
+		while true do
+			-- indefinite until cancelled
+			sleep(s)
+			fn()
+		end
+	end)
+end
+
+---Loop over App.tasks to resume eligible tasks
+---adding them to a fresh list if they are not dead.
+---@param eventData table
+---@return table survivingTasks
+---@private
+function App:resumeTasks(eventData)
+	local survivingTasks = {}
+	for _, v in ipairs(self.tasks) do
+		if not v.cancelled then
+			if v.filter == nil or v.filter == eventData[1] or eventData[1] == "terminate" then
+				local ok, newFilter = coroutine.resume(v.co, table.unpack(eventData, 1, eventData.n))
+				if not ok then
+					error(newFilter, 0)
+				end
+				v.filter = newFilter
+			end
+			if coroutine.status(v.co) ~= "dead" then
+				table.insert(survivingTasks, v)
+			end
+		end
+	end
+
+	return survivingTasks
+end
+
+---Loop over App.pendingTasks to drain and start all tasks
+---adding them to App.tasks if they are not dead.
+---@private
+function App:startPendingTasks()
+	for _, v in ipairs(self.pendingTasks) do
+		if not v.cancelled then
+			local ok, filter = coroutine.resume(v.co)
+			if not ok then
+				error(filter, 0)
+			end
+			v.filter = filter
+			if coroutine.status(v.co) ~= "dead" then
+				table.insert(self.tasks, v)
+			end
+		end
+	end
+
+	self.pendingTasks = {}
 end
 
 -- Private functions for the :start loop
@@ -191,6 +286,8 @@ function App:open()
 
 	self.running = true
 
+	self:startPendingTasks()
+
 	self:renderUI()
 end
 
@@ -199,11 +296,19 @@ end
 ---@see App.start for normal control.
 function App:update(...)
 	local eventData = table.pack(...)
+
+	-- resume ongoing tasks
+	self.tasks = self:resumeTasks(eventData)
+
+	-- handle main-thread events
 	self:broadcast(eventData)
 	local uiEvent = self:translate(eventData)
 	if uiEvent then
 		self:dispatch(uiEvent)
 	end
+
+	-- start new tasks
+	self:startPendingTasks()
 
 	self:renderUI()
 end
@@ -216,6 +321,13 @@ function App:close()
 	self.running = false -- may be redundant but just to be sure
 	self:clearScreen()
 	self.root:unmount()
+end
+
+---Sends a redraw event to the application
+function App:invalidate()
+	-- TODO: set/unset a flag so that 10 terminate calls
+	-- result in just one event
+	os.queueEvent("ccui_redraw")
 end
 
 ---Mounts the app along with a controlled main event loop and error handling.
