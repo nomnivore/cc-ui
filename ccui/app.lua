@@ -325,7 +325,7 @@ end
 
 ---Sends a redraw event to the application
 function App:invalidate()
-	-- TODO: set/unset a flag so that 10 terminate calls
+	-- TODO: set/unset a flag so that 10 invalidate calls
 	-- result in just one event
 	os.queueEvent("ccui_redraw")
 end
