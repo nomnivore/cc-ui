@@ -5,7 +5,7 @@ require("_path")
 local ui = require("ccui")
 
 local function centeredHorizontally(self)
-	return math.floor((self.parent:getProp("width") - self:getProp("width")) / 2)
+	return math.floor((self.parent:getSize() - self:getSize()) / 2)
 end
 
 local app = ui.App({
@@ -59,7 +59,8 @@ local app = ui.App({
 		text = "Exit Program",
 		x = centeredHorizontally,
 		y = function(self)
-			return self.app.root:getProp("height") - 1
+			local _, h = self.app.root:getSize()
+			return h - 1
 		end,
 	}):onClick(function(self)
 		self.app:stop()
@@ -68,7 +69,8 @@ local app = ui.App({
 		text = "'k' to increment, 'j' to decrement, 'q' to quit",
 		x = centeredHorizontally,
 		y = function(self)
-			return self.app.root:getProp("height")
+			local _, h = self.app.root:getSize()
+			return h
 		end,
 	}),
 })

@@ -83,7 +83,8 @@ app.root:add(c.Frame
 		:add(c.Label.new({
 			text = "<",
 			x = function(self)
-				return self.parent:getProp("width")
+				local w = self.parent:getSize()
+				return w
 			end,
 			y = 4,
 		}))
@@ -92,7 +93,8 @@ app.root:add(c.Frame
 			text = "v",
 			x = 2,
 			y = function(self)
-				return self.parent:getProp("height")
+				local _, h = self.parent:getSize()
+				return h
 			end,
 		}))))
 

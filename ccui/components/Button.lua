@@ -42,14 +42,20 @@ function Button:getText()
 	return tostring(self:getProp("text"))
 end
 
+---Returns the size the component would like to take, based on its content
+---@return integer width, integer height
+function Button:getPreferredSize()
+	local text = self:getText()
+	return #text + 2, 1
+end
+
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
 	local bg = self:getProp("bgColor")
 	local fg = self:getProp("fgColor")
-	local x = self:getProp("x")
-	local y = self:getProp("y")
-	local width = self:getProp("width")
-	local height = self:getProp("height")
+	local x = self.rect.x
+	local y = self.rect.y
+	local width, height = self:getSize()
 	local text = self:getText()
 
 	local labelY = y + math.floor((height - 1) / 2)

@@ -14,8 +14,8 @@ local util = require("ccui.util")
 ---@field type string|fun(self: Component): string
 ---@field x number|fun(self: Component): number
 ---@field y number|fun(self: Component): number
----@field width number|fun(self: Component): number
----@field height number|fun(self: Component): number
+---@field width number|fun(self: Component): number|"fill"
+---@field height number|fun(self: Component): number|"fill"
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string
@@ -29,14 +29,15 @@ local util = require("ccui.util")
 ---@field handlers table<UIEvent, UIEventFn[]>
 ---@field props ComponentProps @see getProp
 ---@field state table<string, any>
+---@field rect Rect?
 local Component = util.class()
 
 ---@class NewComponentProps
 ---@field type string|nil|fun(self: Component): string
 ---@field x number|nil|fun(self: Component): number
 ---@field y number|nil|fun(self: Component): number
----@field width number|nil|fun(self: Component): number
----@field height number|nil|fun(self: Component): number
+---@field width number|nil|fun(self: Component): number|"fill"
+---@field height number|nil|fun(self: Component): number|"fill"
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string|nil
@@ -65,8 +66,6 @@ function Component.new(props, cls)
 	self.props.type = "component"
 	self.props.x = 1
 	self.props.y = 1
-	self.props.width = 1
-	self.props.height = 1
 
 	self.parent = nil
 	self.children = {}
@@ -111,6 +110,32 @@ function Component.new(props, cls)
 	end
 
 	return self
+end
+
+---Returns the size the component would like to take, based on its content
+---@return integer width, integer height
+function Component:getPreferredSize()
+	return 1, 1 -- an "empty" default that subclasses are meant to override
+end
+
+---Computes the size this component will take, given props and layout constraints
+---@param availW integer available width
+---@param availH integer available height
+---@return integer width, integer height
+function Component:measure(availW, availH)
+	local prefW, prefH = self:getPreferredSize()
+
+	local w = self:getProp("width", prefW)
+	if w == "fill" then
+		w = availW
+	end
+
+	local h = self:getProp("height", prefH)
+	if h == "fill" then
+		h = availH
+	end
+
+	return w, h
 end
 
 --- Finds a component by its id
@@ -165,7 +190,12 @@ end
 ---@return integer width
 ---@return integer height
 function Component:getSize()
-	return self:getProp("width", 0), self:getProp("height", 0)
+	-- return rect width/height, or 0,0 if nil
+	if self.rect == nil then
+		return 0, 0
+	end
+
+	return self.rect.width, self.rect.height
 end
 
 -- Event handling
@@ -270,8 +300,11 @@ end
 --- (x, y)
 ---@return number, number
 function Component:getScreenPos()
-	local x = self:getProp("x")
-	local y = self:getProp("y")
+	local x, y = 1, 1
+	if self.rect ~= nil then
+		x = self.rect.x
+		y = self.rect.y
+	end
 
 	if self.parent then
 		local pX, pY = self.parent:getScreenPos()
@@ -286,12 +319,17 @@ end
 ---@param y number
 ---@return boolean
 function Component:hitTest(x, y)
+	if self.rect == nil then
+		return false
+	end
+
 	local posX, posY = self:getScreenPos()
+	local w, h = self:getSize()
 	return util.pointInRect(x, y, {
 		x = posX,
 		y = posY,
-		width = self:getProp("width"),
-		height = self:getProp("height"),
+		width = w,
+		height = h,
 	})
 end
 
@@ -314,6 +352,9 @@ function Component:onClick(callback)
 	---@cast self Component
 	return self:on("click", callback)
 end
+
+---Stubbed for Components. Containers (Frames ->etc) compute rect sizes
+function Component:layout() end
 
 --- Render the component to the display
 --- Empty by default

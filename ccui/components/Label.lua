@@ -21,9 +21,6 @@ function Label.new(props)
 	self.props.type = "label"
 	self.props.text = props.text or ""
 
-	self.props.width = props.width or function(self)
-		return #self:getText()
-	end
 	return self
 end
 
@@ -39,10 +36,17 @@ function Label:getText()
 	return tostring(self:getProp("text"))
 end
 
+---Returns the size the component would like to take, based on its content
+---@return integer width, integer height
+function Label:getPreferredSize()
+	local text = self:getText()
+	return #text, 1
+end
+
 ---@param term ccTweaked.term.Redirect
 function Label:render(term)
-	local x = self:getProp("x")
-	local y = self:getProp("y")
+	local x = self.rect.x
+	local y = self.rect.y
 	local fg = self:getProp("fgColor")
 	local bg = self:getProp("bgColor")
 	local text = self:getText()

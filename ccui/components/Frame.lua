@@ -105,14 +105,32 @@ function Frame:findTarget(x, y)
 	return self
 end
 
+---Computes the rect of each child, then lays out the child
+function Frame:layout()
+	local cw, ch = self:getSize() -- content size of this container
+
+	for _, child in ipairs(self.children) do
+		local w, h = child:measure(cw, ch)
+		child.rect = { x = 1, y = 1, width = w, height = h } -- provisional
+		local x, y = child:getProp("x", 1), child:getProp("y", 1)
+		if child:getProp("width") == "fill" then
+			w = cw - x + 1
+		end
+		if child:getProp("height") == "fill" then
+			h = ch - y + 1
+		end
+		child.rect = { x = x, y = y, width = w, height = h }
+		child:layout()
+	end
+end
+
 ---@param term ccTweaked.term.Redirect
 function Frame:render(term)
-	local x = self:getProp("x")
-	local y = self:getProp("y")
+	local x = self.rect.x
+	local y = self.rect.y
 	local bgColor = self:getProp("bgColor")
 	local fgColor = self:getProp("fgColor")
-	local width = self:getProp("width")
-	local height = self:getProp("height")
+	local width, height = self:getSize()
 
 	-- window scopes the frame & its children to its defined space
 	local win = window.create(term, x, y, width, height)

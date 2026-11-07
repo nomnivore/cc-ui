@@ -80,6 +80,11 @@ end
 
 function App:renderUI()
 	self.buffer.setVisible(false)
+	-- compute the layout
+	local termW, termH = self.root:measure(self.term.getSize())
+	self.root.rect = { x = 1, y = 1, width = termW, height = termH }
+	self.root:layout()
+
 	-- resize the buffer, if needed
 	local rootW, rootH = self.root:getSize()
 	local bufW, bufH = self.buffer.getSize()

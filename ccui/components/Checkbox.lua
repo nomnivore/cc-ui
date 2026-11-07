@@ -20,8 +20,6 @@ function Checkbox.new(props)
 
 	self.props.type = "checkbox"
 	self.props.checked = props.checked or false
-	self.props.height = 1
-	self.props.width = 3
 
 	self:onClick(function()
 		self:toggle()
@@ -52,10 +50,16 @@ function Checkbox:isChecked()
 	return self:getProp("checked")
 end
 
+---Returns the size the component would like to take, based on its content
+---@return integer width, integer height
+function Checkbox:getPreferredSize()
+	return 3, 1
+end
+
 ---@param term ccTweaked.term.Redirect
 function Checkbox:render(term)
-	local x = self:getProp("x")
-	local y = self:getProp("y")
+	local x = self.rect.x
+	local y = self.rect.y
 	local bgColor = self:getProp("bgColor")
 	local fgColor = self:getProp("fgColor")
 	local checked = self:getProp("checked")

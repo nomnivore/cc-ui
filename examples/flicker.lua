@@ -6,8 +6,7 @@ local c = UI.Components
 local INTERVAL = 0.05 -- one game tick
 
 local app = UI.App.new()
-local width = app.root:getProp("width")
-local height = app.root:getProp("height")
+local width, height = app.term.getSize()
 local frames = 0
 
 app.root:setProp("bgColor", colors.blue)
