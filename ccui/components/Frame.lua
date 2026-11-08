@@ -2,7 +2,6 @@ local Component = require("ccui.components.Component")
 local util = require("ccui.util")
 
 ---@class FrameProps : ComponentProps
----@field term ccTweaked.term.Redirect
 
 ---@class Frame : Component
 ---@overload fun(props?: NewFrameProps): Frame
@@ -11,24 +10,32 @@ local Frame = util.class(Component)
 Frame.isContainer = true
 
 ---@class NewFrameProps : NewComponentProps
----@field term ccTweaked.term.Redirect?
 ---@field [integer] Component|false
 
----@param frame Frame
-local function defaultSize(frame)
-	-- use 'term' prop if present, otherwise use parent size
-	---@type ccTweaked.term.Redirect?
-	local t = frame:getProp("term")
+---Returns a window at the given rect inside `parent`, reusing the cached one when possible
+---@param holder Component
+---@param parent ccTweaked.Window
+---@param key "window"|"contentWindow"
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return ccTweaked.Window
+local function placeWindow(holder, key, parent, x, y, w, h)
+	local entry = holder[key]
+	if entry == nil or entry.parent ~= parent then
+		entry = { parent = parent, win = window.create(parent, x, y, w, h) }
+		holder[key] = entry
+	else
+		-- if position or size differ, reposition
+		local wX, wY = entry.win.getPosition()
+		local wW, wH = entry.win.getSize()
 
-	if t then
-		return t.getSize()
+		if wX ~= x or wY ~= y or wW ~= w or wH ~= h then
+			entry.win.reposition(x, y, w, h)
+		end
 	end
-
-	if not frame.parent then
-		return 0, 0
-	end
-
-	return frame.parent:getProp("width", 0), frame.parent:getProp("height", 0)
+	return entry.win
 end
 
 --- Creates a new frame component, which is a container for other components.
@@ -43,18 +50,8 @@ function Frame.new(props)
 
 	self.props.type = "frame"
 
-	self.props.width = props.width
-		or function(s)
-			---@cast s Frame
-			local w = defaultSize(s)
-			return w - s:getProp("x") + 1
-		end
-	self.props.height = props.height
-		or function(s)
-			---@cast s Frame
-			local _, h = defaultSize(s)
-			return h - s:getProp("y") + 1
-		end
+	self.props.width = props.width or "fill"
+	self.props.height = props.height or "fill"
 
 	-- add children from positional arguments
 	for _, v in ipairs(props) do
@@ -124,30 +121,15 @@ function Frame:layout()
 	end
 end
 
----@param term ccTweaked.term.Redirect
-function Frame:render(term)
-	local x = self.rect.x
-	local y = self.rect.y
-	local bgColor = self:getProp("bgColor")
-	local fgColor = self:getProp("fgColor")
-	local width, height = self:getSize()
-
-	-- window scopes the frame & its children to its defined space
-	local win = window.create(term, x, y, width, height)
-	win.setBackgroundColor(bgColor)
-	win.setTextColor(fgColor)
-
-	-- fills background color
-	win.clear()
-
+---@param win ccTweaked.Window
+function Frame:render(win)
 	-- render children
 	for _, child in ipairs(self.children) do
-		-- sane defaults
-		win.setCursorPos(1, 1)
-		win.setBackgroundColor(bgColor)
-		win.setTextColor(fgColor)
-
-		child:render(win)
+		if child.rect.width > 0 and child.rect.height > 0 then
+			local childWin =
+				placeWindow(child, "window", win, child.rect.x, child.rect.y, child.rect.width, child.rect.height)
+			child:draw(childWin)
+		end
 	end
 end
 

@@ -14,8 +14,8 @@ local util = require("ccui.util")
 ---@field type string|fun(self: Component): string
 ---@field x number|fun(self: Component): number
 ---@field y number|fun(self: Component): number
----@field width number|fun(self: Component): number|"fill"
----@field height number|fun(self: Component): number|"fill"
+---@field width number|"fill"|fun(self: Component): number|"fill"
+---@field height number|"fill"|fun(self: Component): number|"fill"
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string
@@ -30,14 +30,15 @@ local util = require("ccui.util")
 ---@field props ComponentProps @see getProp
 ---@field state table<string, any>
 ---@field rect Rect?
+---@field private window { parent: ccTweaked.Window, win: ccTweaked.Window }
 local Component = util.class()
 
 ---@class NewComponentProps
 ---@field type string|nil|fun(self: Component): string
 ---@field x number|nil|fun(self: Component): number
 ---@field y number|nil|fun(self: Component): number
----@field width number|nil|fun(self: Component): number|"fill"
----@field height number|nil|fun(self: Component): number|"fill"
+---@field width number|nil|"fill"|fun(self: Component): number|"fill"
+---@field height number|nil|"fill"|fun(self: Component): number|"fill"
 ---@field bgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field fgColor ccTweaked.colors.color|nil|fun(self: Component): ccTweaked.colors.color
 ---@field id string|nil
@@ -356,10 +357,20 @@ end
 ---Stubbed for Components. Containers (Frames ->etc) compute rect sizes
 function Component:layout() end
 
+---Provisions a window for the component and then renders it
+---@param win ccTweaked.Window
+function Component:draw(win)
+	win.setBackgroundColor(self:getProp("bgColor"))
+	win.setTextColor(self:getProp("fgColor"))
+	win.clear()
+	win.setCursorPos(1, 1)
+	self:render(win)
+end
+
 --- Render the component to the display
 --- Empty by default
----@param term ccTweaked.term.Redirect
+---@param win ccTweaked.Window
 ---@diagnostic disable-next-line: unused-local
-function Component:render(term) end
+function Component:render(win) end
 
 return Component

@@ -51,26 +51,12 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Button:render(term)
-	local bg = self:getProp("bgColor")
-	local fg = self:getProp("fgColor")
-	local x = self.rect.x
-	local y = self.rect.y
-	local width, height = self:getSize()
+	local _, height = self:getSize()
 	local text = self:getText()
 
-	local labelY = y + math.floor((height - 1) / 2)
+	local labelY = 1 + math.floor((height - 1) / 2)
 
-	term.setBackgroundColor(bg)
-	term.setTextColor(fg)
-
-	term.setCursorPos(x, y)
-	-- print entire width/height using bg color
-	for i = 1, height do
-		term.setCursorPos(x, y + i - 1)
-		term.write(string.rep(" ", width))
-	end
-
-	term.setCursorPos(x + 1, labelY)
+	term.setCursorPos(2, labelY)
 	term.write(text)
 end
 

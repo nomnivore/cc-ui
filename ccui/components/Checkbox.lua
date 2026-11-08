@@ -58,12 +58,9 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Checkbox:render(term)
-	local x = self.rect.x
-	local y = self.rect.y
 	local bgColor = self:getProp("bgColor")
 	local fgColor = self:getProp("fgColor")
 	local checked = self:getProp("checked")
-	term.setCursorPos(x, y)
 	term.blit(checked and "[x]" or "[ ]", string.rep(colors.toBlit(fgColor), 3), string.rep(colors.toBlit(bgColor), 3))
 end
 

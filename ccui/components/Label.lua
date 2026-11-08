@@ -45,12 +45,10 @@ end
 
 ---@param term ccTweaked.term.Redirect
 function Label:render(term)
-	local x = self.rect.x
-	local y = self.rect.y
 	local fg = self:getProp("fgColor")
 	local bg = self:getProp("bgColor")
 	local text = self:getText()
-	term.setCursorPos(x, y)
+
 	term.blit(text, string.rep(colors.toBlit(fg), #text), string.rep(colors.toBlit(bg), #text))
 end
 

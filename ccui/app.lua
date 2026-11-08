@@ -37,7 +37,6 @@ function App.new(opts)
 	self.monitorName = ok and name or nil
 
 	self.root = Frame.new({
-		term = self.term,
 		-- inherited properties found in ./components/Component.lua
 		-- should have defaults defined here
 		bgColor = colors.black,
@@ -92,7 +91,7 @@ function App:renderUI()
 		self.buffer.reposition(1, 1, rootW, rootH)
 	end
 
-	self.root:render(self.buffer)
+	self.root:draw(self.buffer)
 	self.buffer.setVisible(true)
 end
 
