@@ -308,8 +308,9 @@ function Component:getScreenPos()
 	end
 
 	if self.parent then
+		local offX, offY = self.parent:getContentOffset()
 		local pX, pY = self.parent:getScreenPos()
-		return x + pX - 1, y + pY - 1
+		return x + pX + offX - 1, y + pY + offY - 1
 	end
 
 	return x, y
@@ -352,6 +353,12 @@ end
 function Component:onClick(callback)
 	---@cast self Component
 	return self:on("click", callback)
+end
+
+---Where the content of the component starts when rendering
+---@return integer x, integer y
+function Component:getContentOffset()
+	return 0, 0
 end
 
 ---Stubbed for Components. Containers (Frames ->etc) compute rect sizes

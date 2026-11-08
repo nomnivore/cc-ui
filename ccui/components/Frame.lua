@@ -90,21 +90,55 @@ function Frame:findTarget(x, y)
 		return
 	end
 
-	-- recursively check if the coord belongs to a child component
-	-- searching last-to-first
-	for i = #self.children, 1, -1 do
-		local hit = self.children[i]:findTarget(x, y)
-		if hit then
-			return hit
+	local posX, posY = self:getScreenPos()
+	local inContentRect = util.pointInRect(x - posX + 1, y - posY + 1, self:getContentRect())
+
+	if inContentRect then
+		-- recursively check if the coord belongs to a child component
+		-- searching last-to-first
+		for i = #self.children, 1, -1 do
+			local hit = self.children[i]:findTarget(x, y)
+			if hit then
+				return hit
+			end
 		end
 	end
 
 	return self
 end
 
+---Returns the sizes of the area around the content rect
+---@return integer left, integer top, integer right, integer bottom
+function Frame:getInsets()
+	--TODO: border/padding
+	return 0, 0, 0, 0
+end
+
+---Returns a Rect covering the space inside this component that children can fill
+---@return Rect rect
+function Frame:getContentRect()
+	local l, t, r, b = self:getInsets()
+	local w, h = self:getSize()
+
+	return {
+		x = l + 1,
+		y = t + 1,
+		width = math.max(0, w - l - r),
+		height = math.max(0, h - t - b),
+	}
+end
+
+---Where the content of the component starts when rendering
+---@return integer x, integer y
+function Frame:getContentOffset()
+	local left, top = self:getInsets()
+	return left, top
+end
+
 ---Computes the rect of each child, then lays out the child
 function Frame:layout()
-	local cw, ch = self:getSize() -- content size of this container
+	local cRect = self:getContentRect()
+	local cw, ch = cRect.width, cRect.height -- content size of this container
 
 	for _, child in ipairs(self.children) do
 		local w, h = child:measure(cw, ch)
@@ -123,11 +157,30 @@ end
 
 ---@param win ccTweaked.Window
 function Frame:render(win)
+	local cRect = self:getContentRect()
+
+	-- skip rendering children if content rect is empty
+	if cRect.width == 0 or cRect.height == 0 then
+		return
+	end
+
+	local contentWin = placeWindow(self, "contentWindow", win, cRect.x, cRect.y, cRect.width, cRect.height)
+	contentWin.setBackgroundColor(self:getProp("bgColor"))
+	contentWin.setTextColor(self:getProp("fgColor"))
+	contentWin.clear()
+
 	-- render children
 	for _, child in ipairs(self.children) do
 		if child.rect.width > 0 and child.rect.height > 0 then
-			local childWin =
-				placeWindow(child, "window", win, child.rect.x, child.rect.y, child.rect.width, child.rect.height)
+			local childWin = placeWindow(
+				child,
+				"window",
+				contentWin,
+				child.rect.x,
+				child.rect.y,
+				child.rect.width,
+				child.rect.height
+			)
 			child:draw(childWin)
 		end
 	end
