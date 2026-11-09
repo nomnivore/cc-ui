@@ -99,15 +99,23 @@ end)
 
 -- job: spawned from a click, reports progress, can be cancelled
 local JOB_STEPS = 10
-row(10, function()
-	local p = job.progress
-	if p == nil then
-		return "job      idle"
-	elseif type(p) == "string" then
-		return "job      " .. p
-	end
-	return "job      [" .. string.rep("#", p) .. string.rep(".", JOB_STEPS - p) .. "] " .. p .. "/" .. JOB_STEPS
-end)
+app:add(ui.ProgressBar({
+	x = 10,
+	y = 10,
+	value = function()
+		return job.progress
+	end,
+	max = JOB_STEPS,
+	text = function()
+		local p = job.progress
+		if p == nil then
+			return "idle"
+		elseif type(p) == "string" then
+			return p
+		end
+		return "running"
+	end,
+}))
 
 app:add(ui.Button({
 	x = 2,

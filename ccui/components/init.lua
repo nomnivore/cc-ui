@@ -7,6 +7,7 @@ local exports = {
 	Stack = require("ccui.components.Stack"),
 	VStack = require("ccui.components.VStack"),
 	HStack = require("ccui.components.HStack"),
+	ProgressBar = require("ccui.components.ProgressBar")
 }
 
 return exports

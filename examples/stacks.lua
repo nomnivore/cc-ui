@@ -24,6 +24,7 @@ local demo = ui.VStack({
 	ui.Label({ text = "a bit longer", bgColor = colors.green }),
 	ui.Label({ text = "medium", bgColor = colors.blue }),
 	ui.Label({ text = "fill", width = "fill", bgColor = colors.purple }),
+	ui.ProgressBar({ width = "fill", value = 0.5, text = "half" }),
 })
 
 -- a frame that reports its own size

@@ -10,6 +10,7 @@ local exports = {
 	Checkbox = require("ccui.components.Checkbox"),
 	VStack = require("ccui.components.VStack"),
 	HStack = require("ccui.components.HStack"),
+	ProgressBar = require("ccui.components.ProgressBar"),
 }
 
 return exports
