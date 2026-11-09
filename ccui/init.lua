@@ -8,6 +8,8 @@ local exports = {
 	Label = require("ccui.components.Label"),
 	Button = require("ccui.components.Button"),
 	Checkbox = require("ccui.components.Checkbox"),
+	VStack = require("ccui.components.VStack"),
+	HStack = require("ccui.components.HStack"),
 }
 
 return exports

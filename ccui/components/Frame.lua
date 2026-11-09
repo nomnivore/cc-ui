@@ -42,10 +42,12 @@ end
 --- Also acts as a root component for an app.
 --- Size defaults to the remaining space in the parent window/terminal if no width/height are given
 ---@param props NewFrameProps?
+---@param cls any? class to instantiate, default Frame
 ---@return Frame
-function Frame.new(props)
+function Frame.new(props, cls)
 	props = props or {}
-	local self = Component.new(props, Frame)
+	cls = cls or Frame
+	local self = Component.new(props, cls)
 	---@cast self Frame
 
 	self.props.type = "frame"
