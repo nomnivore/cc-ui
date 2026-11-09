@@ -1,7 +1,23 @@
 [
   {
     "type": "file",
+    "url": "components/VStack.lua"
+  },
+  {
+    "type": "file",
+    "url": "components/Stack.lua"
+  },
+  {
+    "type": "file",
     "url": "components/Frame.lua"
+  },
+  {
+    "type": "file",
+    "url": "components/HStack.lua"
+  },
+  {
+    "type": "file",
+    "url": "components/ProgressBar.lua"
   },
   {
     "type": "file",
